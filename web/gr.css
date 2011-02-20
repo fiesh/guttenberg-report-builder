@@ -26,16 +26,16 @@ body {
 
 #prev {
     position: absolute;
-    top: 865px;
+    top: 431px;
     z-Index: 1000;
     left: 15px;
 }
 
 #next {
-    top: 865px;
+    top: 431px;
     z-Index: 1000;
     position: absolute;
-    left: 1192px;
+    right: 15px;
 }
 
 .wrapper {
