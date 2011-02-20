@@ -63,6 +63,7 @@ function printout($fragments, $page)
         <script src="http://code.jquery.com/jquery-1.5.min.js"></script>
     </head>
     <body>
+        <div class="guttenberg-titel">Karl-Theodor zu Guttenberg, Verfassung und Verfassungsvertrag, 2009</div>
         <div class="wrapper">
             <div id="page">
 ';
