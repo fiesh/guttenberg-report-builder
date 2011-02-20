@@ -136,9 +136,9 @@ function printout($fragments, $page)
         </div>
         <div class="navigation">
 ';
-    $ret .= '<div id="prev"><a href="'.($page > 2 ? sprintf('%03d', $page - 1).'.html' : '#').'"><img src="prev.jpg" border="0" /></a></div>';
+    $ret .= '<div id="prev"><a href="'.($page > 2 ? sprintf('%03d', $page - 1).'.html' : '#').'"><img src="prev.png" border="0" /></a></div>';
     $ret .= '<div id="pagenum">'.$page.'</div>';
-    $ret .= '<div id="next"><a href="'.($page < 474 ? sprintf('%03d', $page + 1).'.html' : '#').'"><img src="next.jpg" border="0" /></a></div>';
+    $ret .= '<div id="next"><a href="'.($page < 474 ? sprintf('%03d', $page + 1).'.html' : '#').'"><img src="next.png" border="0" /></a></div>';
     $ret .= '
         </div>
     </body>
