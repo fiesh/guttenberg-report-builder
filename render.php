@@ -5,12 +5,28 @@ function insert_plag($pn, $num)
     return '				<div id="plag'.$pn.'_'.$num.'"><img src="plagiate/'.$pn.'_'.$num.'.png" /></div>'."\n";
 }
 
-function insert_script($pn, $num, $info)
+function insert_orig($pn, $f, $num)
 {
+    return '				<div id="orig'.$pn.'_'.$num.'" class="orig">'.$f['orig'].'</div>'."\n";
+}
+
+
+function insert_script($pn, $num, $f)
+{
+    $source = '';
+    if(isset($f['url'])) {
+        $source .= '<div class="src"><a href="'.$f['url'].'">'.$f['src'].'</a></div>';
+    } else {
+        $source .= '<div class="src">'.$f['src'].'</div>';
+    }
+
     return '		$(\'#plag'.$pn.'_'.$num.'\').hover(
         function () {
-            $(\'#infoblock\').replaceWith($(\'<div id="infoblock">'.$info.'</div>\'));
-            //$(\'#plag'.$pn.'_'.$num.'\').replaceWith(\'<div id="plag'.$pn.'_'.$num.'_rb"><img src="plagiate/'.$pn.'_'.$num.'.png" /></div>\');
+            $(\'#infoblock-cat\').replaceWith($(\'<div class="category" id="infoblock-cat">'.$f['category'].'</div>\'));
+            $(\'#infoblock-src\').replaceWith($(\'<div class="src" id="infoblock-src">'.$source.'</div>\'));
+            deselect(activeOrig);
+            activeOrig = $(\'#orig'.$pn.'_'.$num.')
+            select(activeOrig);
         },
         function () {
             //$(\'#plag'.$pn.'_'.$num.'_rb\').replaceWith(\'<div id="plag'.$pn.'_'.$num.'"><img src="plagiate/'.$pn.'_'.$num.'.png" /></div>\');
@@ -28,6 +44,12 @@ function insert_css($pn, $num, $fragment)
             height: '.$fragment['length'].'px;
             position: absolute;
             top: '.$fragment['startpos'].'px;
+        }
+        #orig'.$pn.'_'.$num.' {
+            z-index: 5;
+            top: '.$fragment['startpos'].'px;
+            height: '.$fragment['length'].'px;
+            position: absolute;
         }
         #plag'.$pn.'_'.$num.'_rb {
             z-index: 10;
@@ -61,6 +83,19 @@ function printout($fragments, $page)
         <title>Guttenberg Report</title>
         <link rel="stylesheet" href="gr.css" />
         <script src="http://code.jquery.com/jquery-1.5.min.js"></script>
+        <script type="text/javascript">
+
+        function deselect(origDiv)
+        {
+            // ToDo: reset z-level and color; best would be to change class
+        }
+
+        function select(origDiv)
+        {
+            // ToDo: increase z-level and highlight with color; best would be to change class
+        }
+
+        </script>
     </head>
     <body>
         <div class="guttenberg-titel">Karl-Theodor zu Guttenberg, Verfassung und Verfassungsvertrag, 2009</div>
@@ -73,7 +108,15 @@ function printout($fragments, $page)
     }
     $ret .= '			</div>
         </div>
-        <div id="infoblock"></div>
+        <div id="infoblock">
+          <div class="category" id="infoblock-cat"></div>
+          <div class="src" id="infoblock-src"></div>'
+    $i = 0;
+    if(isset($fragments)) foreach($fragments as $f) {
+        $ret .= insert_orig($page, $f, $i++);
+    }
+    $ret .='
+        </div>
         <div class="navigation">
 ';
     $ret .= '<div id="prev"><a href="'.($page > 2 ? sprintf('%03d', $page - 1).'.html' : '#').'"><img src="prev.jpg" border="0" /></a></div>';
@@ -83,6 +126,7 @@ function printout($fragments, $page)
         </div>
     </body>
     <script type="text/javascript">
+        var activeOrig = null;
 ';
 
     $i = 0;
