@@ -8,7 +8,7 @@ function insert_plag($pn, $num)
 function insert_orig($pn, $f, $num)
 {
     $tooltip =  'Quelle:'.str_replace('"','',$f['src']);
-    if (isset($f['anmerkung'])
+    if (isset($f['anmerkung']))
         {
             $tooltip .=  '&#10;Anmerkung:'.str_replace('"','',$f['anmerkung']);
         }
