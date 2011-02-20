@@ -49,7 +49,7 @@ body {
     margin-left: 616px;
     padding-left:10px;
     padding-right:10px;
-    width: 600px;
+    min-width: 600px;
     background: #ffffff;
     min-height: 910px;
     border: 1px solid green;
