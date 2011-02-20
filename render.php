@@ -21,9 +21,9 @@ function insert_script($pn, $num, $f)
     }
 
     return '		$(\'#plag'.$pn.'_'.$num.'\').hover(
-        function () {
-            $(\'#infoblock-cat\').replaceWith($(\'<div class="category" id="infoblock-cat">'.$f['category'].'</div>\'));
-            $(\'#infoblock-src\').replaceWith($(\'<div class="src" id="infoblock-src">'.$source.'</div>\'));
+		function () {
+		$(\'#infoblock-cat\').replaceWith(\'<div class="category" id="infoblock-cat">'.$f['category'].'</div>\');
+		$(\'#infoblock-src\').replaceWith(\'<div class="src" id="infoblock-src">'.$source.'</div>\');
             deselect(activeOrig);
             activeOrig = $(\'#orig'.$pn.'_'.$num.'\');
             select(activeOrig);
