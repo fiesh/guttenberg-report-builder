@@ -16,6 +16,15 @@ body {
     color: navy;
 }
 
+#pagenum {
+    position: absolute;
+    font-style: italic;
+    font-size: 125%;
+    top: 25px;
+    z-Index: 1000;
+    left: 25px;
+}
+
 #prev {
     position: absolute;
     top: 865px;
