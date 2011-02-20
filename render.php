@@ -131,8 +131,7 @@ function printout($fragments, $page)
 
     $i = 0;
     if(isset($fragments)) foreach($fragments as $f) {
-        $info = prepare_expl($f);
-        $ret .= insert_script($page, $i++, $info);
+        $ret .= insert_script($page, $i++, $f);
     }
 
     $ret .= '
