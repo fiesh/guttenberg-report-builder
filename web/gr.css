@@ -8,14 +8,14 @@ body {
 }
 
 .wrapper {
-	width: 1212px;
+	width: 608px;
 	float: left;
     	margin: 0 auto;
 }
 
 #infoblock {
 	float: center;
-	margin: 0px 20px 0px 1232px;
+	margin: 0px 20px 0px 616px;
 	background: #fff;
 	min-height: 910px;
 	border: 1px solid green;
@@ -49,10 +49,20 @@ body {
 	position: relative;
 	float: center;
 	margin: 20px 40px 20px 40px;
+	width: 120px;
 	top: 0px;
 	left: 0px;
 	border: none;
 	margin: 0px;
 	padding: 0px;
-	cursor: pointer;
+}
+
+#prev {
+	position: absolute;
+	left: 0px;
+}
+
+#next {
+	position: absolute;
+	right: 0px;
 }
