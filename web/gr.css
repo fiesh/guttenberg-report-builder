@@ -12,7 +12,6 @@ body {
 
 :link {
     text-decoration: none;
-    font-family: Helvetica, Arial, sans-serif;
     color: navy;
 }
 
@@ -65,8 +64,20 @@ body {
 }
 
 #infoblock .src {
+    font-family: Helvetica, Arial, sans-serif;
     margin-top: 40px;
     font-size: 100%;
+}
+
+.guttenberg-titel
+{
+    font-family:  Helvetica, Arial, sans-serif;
+    position: absolute;
+    font-size: 100%;
+    top: 27px;
+    left: 80px;
+    width: 550px;
+    z-Index:999;
 }
 
 #infoblock .category {
