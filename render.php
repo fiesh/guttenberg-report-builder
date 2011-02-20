@@ -96,12 +96,20 @@ function printout($fragments, $page)
 
         function deselect(origDiv)
         {
-            // ToDo: reset z-level and color; best would be to change class
+            // reset z-level and bgcolor;
+            if (origDiv) {
+                origDiv.css("background", "white");
+                origDiv.css("z-Index", "50");
+            }
         }
 
         function select(origDiv)
         {
-            // ToDo: increase z-level and highlight with color; best would be to change class
+            // increase z-level and highlight with bgcolor;
+            if (origDiv) {
+                origDiv.css("background", "yellow");
+                origDiv.css("z-Index", "500");
+            }
         }
 
         </script>
