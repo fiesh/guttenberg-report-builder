@@ -25,7 +25,7 @@ function insert_script($pn, $num, $f)
             $(\'#infoblock-cat\').replaceWith($(\'<div class="category" id="infoblock-cat">'.$f['category'].'</div>\'));
             $(\'#infoblock-src\').replaceWith($(\'<div class="src" id="infoblock-src">'.$source.'</div>\'));
             deselect(activeOrig);
-            activeOrig = $(\'#orig'.$pn.'_'.$num.')
+            activeOrig = $(\'#orig'.$pn.'_'.$num.'\');
             select(activeOrig);
         },
         function () {
