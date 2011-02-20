@@ -209,7 +209,7 @@ foreach($fragments as $f) {
 
 $fragments = array();
 
-for($page = 2; $page <= 474; $page += 2) {
+for($page = 1; $page <= 475; $page++) {
 	$fragments = array();
 	$page = sprintf('%03d', $page);
 	$i = 0;
@@ -217,18 +217,7 @@ for($page = 2; $page <= 474; $page += 2) {
 		if($f['pagenumber'] == $page) {
 			if($f['startpos'] + $f['length'] <= 910) {
 				prepare_png($page, $i++, $f);
-				$fragments['left'][] = $f;
-			} else {
-				print 'Probleme mit Fragment '.$f['pagenumber'].' '.$f['lines']."!\n";
-			}
-		}
-
-	$i = 0;
-	foreach($fr as $f)
-		if($f['pagenumber'] == $page + 1) {
-			if($f['startpos'] + $f['length'] <= 910) {
-				prepare_png(sprintf('%03d', $page + 1), $i++, $f);
-				$fragments['right'][] = $f;
+				$fragments[] = $f;
 			} else {
 				print 'Probleme mit Fragment '.$f['pagenumber'].' '.$f['lines']."!\n";
 			}

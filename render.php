@@ -64,26 +64,19 @@ function printout($fragments, $page)
 	</head>
 	<body>
 		<div class="wrapper">
-			<div id="leftpage">
+			<div id="page">
 ';
 	$i = 0;
-	if(isset($fragments['left'])) foreach($fragments['left'] as $f) {
+	if(isset($fragments)) foreach($fragments as $f) {
 		$ret .= insert_plag($page, $i++);
-	}
-	$ret .= '			</div>
-			<div id="rightpage">';
-
-	$i = 0;
-	if(isset($fragments['right'])) foreach($fragments['right'] as $f) {
-		$ret .= insert_plag(sprintf('%03d', $page + 1), $i++);
 	}
 	$ret .= '			</div>
 		</div>
 		<div id="infoblock"></div>
 		<div class="navigation">
 ';
-	$ret .= '<div id="prev"><a href="'.($page > 2 ? sprintf('%03d', $page - 2).'.html' : '#').'"><img src="prev.jpg" border="0" /></a></div>';
-	$ret .= '<div id="next"><a href="'.($page < 474 ? sprintf('%03d', $page + 2).'.html' : '#').'"><img src="next.jpg" border="0" /></a></div>';
+	$ret .= '<div id="prev"><a href="'.($page > 2 ? sprintf('%03d', $page - 1).'.html' : '#').'"><img src="prev.jpg" border="0" /></a></div>';
+	$ret .= '<div id="next"><a href="'.($page < 474 ? sprintf('%03d', $page + 1).'.html' : '#').'"><img src="next.jpg" border="0" /></a></div>';
 	$ret .= '
 		</div>
 	</body>
@@ -91,50 +84,31 @@ function printout($fragments, $page)
 ';
 
 	$i = 0;
-	if(isset($fragments['left'])) foreach($fragments['left'] as $f) {
+	if(isset($fragments)) foreach($fragments as $f) {
 		$info = prepare_expl($f);
 		$ret .= insert_script($page, $i++, $info);
 	}
 
-	$i = 0;
-	if(isset($fragments['right'])) foreach($fragments['right'] as $f) {
-		$info = prepare_expl($f);
-		$ret .= insert_script(sprintf('%03d', $page + 1), $i++, $info);
-	}
 	$ret .= '
 	</script>
 	<style type="text/css">
 ';
 
 	$ret .= '
-		#leftpage {
+		#page {
 			width: 600px;
 			height: 910px;
 			padding-left: 2px;
 			padding-right: 2px;
 			border: 1px solid #000;
-			float: left;
 			background: url(images/'.$page.'_blur.png);
-		}
-		#rightpage {
-			width: 600px;
-			padding-left: 2px;
-			padding-right: 2px;
-			height: 910px;
-			border: 1px solid #000;
-			float: right;
-			background: url(images/'.(sprintf('%03d', $page + 1)).'_blur.png);
 		}
 ';
 	$i = 0;
-	if(isset($fragments['left'])) foreach($fragments['left'] as $f) {
+	if(isset($fragments)) foreach($fragments as $f) {
 		$ret .= insert_css($page, $i++, $f);
 	}
 
-	$i = 0;
-	if(isset($fragments['right'])) foreach($fragments['right'] as $f) {
-		$ret .= insert_css(sprintf('%03d', $page + 1), $i++, $f);
-	}
 	$ret .= '	</style>
 </html>
 ';
