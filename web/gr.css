@@ -1,0 +1,58 @@
+html, body {
+	height: 100%;
+	background: #e0e0e0;
+}
+
+body {
+	text-align: center;
+}
+
+.wrapper {
+	width: 1212px;
+	float: left;
+    	margin: 0 auto;
+}
+
+#infoblock {
+	float: center;
+	margin: 0px 20px 0px 1232px;
+	background: #fff;
+	min-height: 910px;
+	border: 1px solid green;
+}
+
+#infoblock .orig {
+	margin-top: 60px;
+	font-size: 16px;
+	color: #404000;
+}
+
+#infoblock .src {
+	margin-top: 40px;
+	font-size: 14px;
+	color: #505050;
+}
+
+#infoblock .category {
+	margin: 10px;
+	font-size: 10px;
+	float: right;
+	color: #606060;
+}
+
+#infoblock .url {
+	font-size 12px;
+	color: #101080;
+}
+
+.navigation {
+	position: relative;
+	float: center;
+	margin: 20px 40px 20px 40px;
+	top: 0px;
+	left: 0px;
+	border: none;
+	margin: 0px;
+	padding: 0px;
+	cursor: pointer;
+}
