@@ -7,21 +7,25 @@ function insert_plag($pn, $num)
 
 function insert_orig($pn, $f, $num)
 {
-    $quelle =  htmlspecialchars(str_replace('"','',$f['src']));
-    $anmerkung =  htmlspecialchars(str_replace('"','',$f['anmerkung']));
-    $orig = htmlspecialchars($f['orig']);
+    $tooltip =  'Quelle:'.str_replace('"','',$f['src']);
+    if (isset($f['anmerkung'])
+        {
+            $tooltip .=  '&#10;Anmerkung:'.str_replace('"','',$f['anmerkung']);
+        }
+
+    $orig = $f['orig'];
     return
     '				<div
               id="orig'.$pn.'_'.$num.'"
               class="orig"
-              title="Quelle:'.$quelle.'&#10;Anmerkung:'.$anmerkung.'"
+              title="'.$tooltip.'"
               >'.$orig.'</div>'."\n";
 }
 
 
 function insert_script($pn, $num, $f)
 {
-    $quelle =  htmlspecialchars(str_replace('"','',$f['src']));
+    $quelle =  str_replace('"','',$f['src']);
     $source = '';
     if(isset($f['url'])) {
         $source .= '<div class="src"><a href="'.$f['url'].'">'.$quelle.'</a></div>';
