@@ -1,11 +1,19 @@
 html, body {
     font-family: "Times New Roman", Times, serif;
+    font-size: 14.5px;
     height: 100%;
-    background: #e0e0e0;
+    background: white;
 }
 
 body {
-    text-align: center;
+    background: white
+    text-align: left;
+}
+
+:link {
+    text-decoration: none;
+    font-family: Helvetica, Arial, sans-serif;
+    color: navy;
 }
 
 .wrapper {
@@ -16,33 +24,37 @@ body {
 
 #infoblock {
     float: center;
-    margin: 0px 20px 0px 616px;
-    background: #fff;
+    margin-left: 616px;
+    padding-left:10px;
+    padding-right:10px;
+    width: 600px;
+    background: #ffffff;
     min-height: 910px;
     border: 1px solid green;
 }
 
 #infoblock .orig {
     margin-top: 60px;
-    font-size: 16px;
+    padding-left:55px;
+    padding-right:55px;
+    font-size: 100%;
     color: #404000;
 }
 
 #infoblock .src {
     margin-top: 40px;
-    font-size: 14px;
-    color: #505050;
+    font-size: 100%;
 }
 
 #infoblock .category {
     margin: 10px;
-    font-size: 10px;
+    font-size: 80%;
     float: right;
     color: #606060;
 }
 
 #infoblock .url {
-    font-size 12px;
+    font-size: 80%;
     color: #101080;
 }
 
