@@ -79,10 +79,13 @@ function printout($fragments, $page)
 	}
 	$ret .= '			</div>
 		</div>
-		<div id="infoblock"></div>';
-	$ret .= '<div class="navigation"><a href="'.($page > 2 ? sprintf('%03d', $page - 2).'.html' : '#').'">Eins zur&uuml;ck</a></div>';
-	$ret .= '<div class="navigation"><a href="'.($page < 474 ? sprintf('%03d', $page + 2).'.html' : '#').'">Eins vor</a></div>';
+		<div id="infoblock"></div>
+		<div class="navigation">
+';
+	$ret .= '<div id="prev"><a href="'.($page > 2 ? sprintf('%03d', $page - 2).'.html' : '#').'"><img src="prev.jpg" border="0" /></a></div>';
+	$ret .= '<div id="next"><a href="'.($page < 474 ? sprintf('%03d', $page + 2).'.html' : '#').'"><img src="next.jpg" border="0" /></a></div>';
 	$ret .= '
+		</div>
 	</body>
 	<script type="text/javascript">
 ';
@@ -103,15 +106,6 @@ function printout($fragments, $page)
 	<style type="text/css">
 ';
 
-	$i = 0;
-	if(isset($fragments['left'])) foreach($fragments['left'] as $f) {
-		$ret .= insert_css($page, $i++, $f);
-	}
-
-	$i = 0;
-	if(isset($fragments['right'])) foreach($fragments['right'] as $f) {
-		$ret .= insert_css(sprintf('%03d', $page + 1), $i++, $f);
-	}
 	$ret .= '
 		#leftpage {
 			width: 600px;
@@ -131,7 +125,17 @@ function printout($fragments, $page)
 			float: right;
 			background: url(images/'.(sprintf('%03d', $page + 1)).'_blur.png);
 		}
-	</style>
+';
+	$i = 0;
+	if(isset($fragments['left'])) foreach($fragments['left'] as $f) {
+		$ret .= insert_css($page, $i++, $f);
+	}
+
+	$i = 0;
+	if(isset($fragments['right'])) foreach($fragments['right'] as $f) {
+		$ret .= insert_css(sprintf('%03d', $page + 1), $i++, $f);
+	}
+	$ret .= '	</style>
 </html>
 ';
 	return $ret;
