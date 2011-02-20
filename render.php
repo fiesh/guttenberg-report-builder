@@ -9,12 +9,13 @@ function insert_orig($pn, $f, $num)
 {
     $quelle =  htmlspecialchars(str_replace('"','',$f['src']));
     $anmerkung =  htmlspecialchars(str_replace('"','',$f['anmerkung']));
+    $orig = htmlspecialchars($f['orig']);
     return
     '				<div
               id="orig'.$pn.'_'.$num.'"
               class="orig"
               title="Quelle:'.$quelle.'&#10;Anmerkung:'.$anmerkung.'"
-              >'.$f['orig'].'</div>'."\n";
+              >'.$orig.'</div>'."\n";
 }
 
 
