@@ -110,7 +110,7 @@ function printout($fragments, $page)
         </div>
         <div id="infoblock">
           <div class="category" id="infoblock-cat"></div>
-          <div class="src" id="infoblock-src"></div>'
+          <div class="src" id="infoblock-src"></div>';
     $i = 0;
     if(isset($fragments)) foreach($fragments as $f) {
         $ret .= insert_orig($page, $f, $i++);
