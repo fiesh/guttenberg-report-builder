@@ -79,7 +79,7 @@ for ($p=1; $p<=475; $p++) {
 
 ?></div><br style="clear:both" /></div>
 <div class="footer">
-Zuletzt aktualisier am <?php echo strftime('%c', time()); ?>
+Zuletzt aktualisiert am <?php echo strftime('%c', time()); ?>
 </div>
 
 </div>
