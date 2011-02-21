@@ -78,7 +78,7 @@ for ($p=1; $p<=475; $p++) {
 
 ?></div><br style="clear:both" /></div>
 <div class="footer">
-Quelle: <a href="http://de.guttenplag.wikia.com/wiki/Fundstellenliste">Fundstellenliste im GuttenPlag-Wiki</a>, Zeitpunkt: <?php echo strftime('%c', time()); ?>
+Zuletzt aktualisier am <?php echo strftime('%c', time()); ?>
 </div>
 
 </div>
