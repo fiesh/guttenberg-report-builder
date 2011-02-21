@@ -223,7 +223,6 @@ foreach($polls['query']['pages'] as $page) {
 $entries = getEntries($pageids);
 if(isset($entries['query']['pages']))
 	$fragments = array_merge($fragments, $entries['query']['pages']);
-exit;
 
 $i = 0;
 foreach($fragments as $f) {
