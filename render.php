@@ -8,10 +8,9 @@ function insert_plag($pn, $num)
 function insert_orig($pn, $f, $num)
 {
     $tooltip =  'Quelle: '.str_replace('"','',$f['src']);
-    if (isset($f['anmerkung']))
+    if (isset($f['anmerkung']) && !empty($f['anmerkung']))
         {
-            $tooltip .=  '
-Anmerkung: '.str_replace('"','',$f['anmerkung']);
+            $tooltip .=  '    Anmerkung: '.str_replace('"','',$f['anmerkung']);
         }
 
     $orig = $f['orig'];
@@ -28,15 +27,19 @@ function insert_script($pn, $num, $f)
 {
     $quelle =  str_replace('"','',$f['src']);
     $source = '';
+    if($f['inLit'] === 'ja')
+	    $lit = '<img src="accept.png" title="Quelle in Literaturverzeichnis vorhanden." />';
+    else
+	    $lit = '<img src="error.png" title="Quelle NICHT in Literaturverzeichnis vorhanden!" />';
     if(isset($f['url'])) {
-        $source .= '<div class="src"><a href="'.$f['url'].'">'.$quelle.'</a></div>';
+        $source .= '<div class="src"><a href="'.$f['url'].'">'.$quelle.'</a></div><div class="inlit">'.$lit.'</div>';
     } else {
-        $source .= '<div class="src">'.$quelle.'</div>';
+        $source .= '<div class="src">'.$quelle.'</div><div class="inlit">'.$lit.'</div>';
     }
 
     return '		$(\'#plag'.$pn.'_'.$num.'\').hover(
         function () {
-        $(\'#infoblock-cat\').replaceWith(\'<div class="category" id="infoblock-cat">'.$f['category'].'</div>\');
+        $(\'#infoblock-cat\').replaceWith(\'<div class="category" id="infoblock-cat"><a href="http://de.guttenplag.wikia.com/wiki/PlagiatsKategorien">'.$f['category'].'</a></div>\');
         $(\'#infoblock-src\').replaceWith(\'<div class="src" id="infoblock-src">'.$source.'</div>\');
             deselect(activeOrig);
             activeOrig = $(\'#orig'.$pn.'_'.$num.'\');
@@ -169,7 +172,7 @@ function printout($fragments, $page)
             padding-left: 2px;
             padding-right: 2px;
             border: 1px solid #000;
-            background: url(images/'.$page.'_blur.png);
+            background: url(images/'.$page.'_blur.jpg);
         }
 ';
     $i = 0;

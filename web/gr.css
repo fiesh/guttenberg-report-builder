@@ -84,6 +84,13 @@ body {
     font-size: 100%;
 }
 
+#infoblock .inlit {
+	position: absolute;
+	top: 10px;
+	left: 760px;
+	z-index: 1000;
+}
+
 .guttenberg-titel
 {
     font-family:  Helvetica, Arial, sans-serif;
@@ -104,7 +111,8 @@ body {
 
 #infoblock .category {
     margin: 10px;
-    font-size: 80%;
+    font-size: 140%;
+    font-weight: bold;
     float: right;
     color: #606060;
 }
