@@ -9,6 +9,8 @@ define('FUSSNOTEN_LAENGE', 14.4);
 define('FUSSNOTEN_ABSATZ_LANGE', 3.5);
 define('HOEHE', 910);
 
+$whitelist = array('KomplettPlagiat', 'Verschleierung', 'HalbsatzFlickerei', 'ShakeAndPaste', 'ÜbersetzungsPlagiat', 'StrukturPlagiat', 'BauernOpfer', 'VerschärftesBauernOpfer');
+
 function calcStartposFussnote($zeile, $fussnoten)
 {
 	$startpos = HOEHE - FUSSNOTEN_MARGIN_UNTEN + FUSSNOTEN_ABSATZ_LAENGE;
@@ -192,7 +194,7 @@ foreach($fragments as $f) {
 	if(isset($a[0]) && $a[0]) {
 		if(!isset($r[(int) $a[1]])) {
 			print "Keine Zeilenangaben fuer Seite ".$a[1]."!\n";
-		} else {
+		} else if(in_array($a[7], $whitelist)) {
 			$fr[$i]['pagenumber'] = $a[1];
 			$fr[$i]['lines'] = $a[2];
 			$fr[$i]['startpos'] = calcStartpos($a[2], $r[(int) $a[1]]);
@@ -204,6 +206,9 @@ foreach($fragments as $f) {
 			$fr[$i]['url'] = $a[10];
 			$fr[$i]['anmerkung'] = $a[11];
 			$i++;
+		} else {
+			print 'Ignoriere: ';
+			var_dump($a);
 		}
 	}
 }
