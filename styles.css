@@ -1,0 +1,21 @@
+body { font-family: Helvetica Neue; }
+h1,h2,h3 { font-family: Times New Roman; text-align: center; margin: 20px 0 30px }
+h1 { margin-bottom: 00px; }
+h2 { margin-top: 10px; }
+p { margin-bottom:40px;text-align: center; }
+.page { float: left; width: 14px; background: #f0f0f0; -webkit-box-shadow: 1px 1px 1px #999;-moz-box-shadow: 1px 1px 1px #999; box-shadow: 1px 1px 1px #999; padding: 1px; height: 21px; margin: 0 8px 8px 0 }	
+.page.plag { background: #f9a0a0!important }	
+.page.plag.multi { background: #d95555!important }	
+.section {
+	position: relative; clear: both; padding: 20px;
+}
+a img { border: 0 }
+.section.indent1 .desc { margin-left: 0px; font-size: 15px;}
+.section.indent2 .desc { margin-left: 30px; font-size: 13px;}
+.section.odd { background: #eee; }
+.section.odd .page { background: #fff; }
+.section .pages {margin-left: 400px;  }
+#wrapper { width: 1000px; margin: 0 auto; }
+.row { clear: both; max-width: 600px; }
+.section .desc { width: 300px; float: left;}
+.footer { margin: 20px 0 10px; text-align: center; }
