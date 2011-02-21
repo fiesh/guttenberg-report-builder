@@ -86,7 +86,8 @@ for ($p=1; $p<=475; $p++) {
 
 ?></div><br style="clear:both" /></div>
 <div class="footer">
-Zuletzt aktualisiert am <?php echo strftime('%c', time()); ?>
+Zuletzt aktualisiert am <?php echo strftime('%c', time()); ?><br />
+<a href="impressum.html">Impressum</a>
 </div>
 
 </div>
