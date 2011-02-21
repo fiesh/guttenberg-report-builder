@@ -1,7 +1,7 @@
 <?php
 
 define('ABSATZ_LAENGE', 10);
-define('ZEILEN_LAENGE', 16.6);
+define('ZEILEN_LAENGE', 16.8);
 define('ZUSATZ', 0);
 define('ZEILEN_MARGIN_OBEN', 95);
 define('FUSSNOTEN_MARGIN_UNTEN', 75);
@@ -99,24 +99,36 @@ function calcLengthZeile($start, $ende, $zeilen)
 	return 2*ZUSATZ + (int) round(ZEILEN_LAENGE * ($ende - $start + 1) + $pos);
 }
 
-function calcStartpos($z, $zeilen)
+function calcStartpos($z, $zeilen, $manualPosition)
 {
-	preg_match_all('/(\d+)-(\d+)/', $z, $a);
-	if($a[1][0] > 100) // Fussnote
-		return calcStartposFussnote($a[1][0] - 100, $zeilen['fussnoten']);
+	preg_match('/^\s*(\d+)\s*-\s*(\d+)\s*$/', $z, $a);
+	if(!$a[2])
+		$a[2] = $a[1];
+	$firstline = (int) $a[1];
+	$lastline = (int) $a[2];
+
+	if(isset($manualPosition[$firstline][$lastline]['start']))
+		return HOEHE * $manualPosition[$firstline][$lastline]['start'];
+	else if($firstline > 100) // Fussnote
+		return calcStartposFussnote($firstline - 100, $zeilen['fussnoten']);
 	else
-		return calcStartposZeile($a[1][0], $zeilen['zeilen']);
+		return calcStartposZeile($firstline, $zeilen['zeilen']);
 }
 
-function calcLength($z, $zeilen)
+function calcLength($z, $zeilen, $manualPosition)
 {
-	preg_match_all('/(\d+)-(\d+)/', $z, $a);
-	if(!$a[2][0])
-		$a[2][0] = $a[1][0];
-	if($a[1][0] > 100) // Fussnote
-		return calcLengthFussnote($a[1][0] - 100, $a[2][0] - 100, $zeilen['fussnoten']);
+	preg_match('/^\s*(\d+)\s*-\s*(\d+)\s*$/', $z, $a);
+	if(!$a[2])
+		$a[2] = $a[1];
+	$firstline = (int) $a[1];
+	$lastline = (int) $a[2];
+
+	if(isset($manualPosition[$firstline][$lastline]['length']))
+		return HOEHE * $manualPosition[$firstline][$lastline]['length'];
+	else if($firstline > 100) // Fussnote
+		return calcLengthFussnote($firstline - 100, $lastline - 100, $zeilen['fussnoten']);
 	else
-		return calcLengthZeile($a[1][0], $a[2][0], $zeilen['zeilen']);
+		return calcLengthZeile($firstline, $lastline, $zeilen['zeilen']);
 }
 
 function prepare_png($pn, $num, $f)
@@ -154,13 +166,29 @@ function createLineNumberTable()
 {
 	$file = fopen('zeilenanzahl', 'r');
 	while(($line = fgets($file)) !== FALSE) {
-		preg_match_all('/(\d+):(\d+):([\d,]+):([\d,]*)/', $line, $a);
-		$r[(int) $a[1][0]]['zeilen'] = explode(',', $a[3][0]);
-		$r[(int) $a[1][0]]['fussnoten'] = explode(',', $a[4][0]);
+		preg_match('/^\s*(\d+):(\d+):([\d,]*):([\d,]*)\s*$/', $line, $a);
+		$r[(int) $a[1]]['zeilen'] = explode(',', $a[3]);
+		$r[(int) $a[1]]['fussnoten'] = explode(',', $a[4]);
 	}
 	fclose($file);
 
 	return $r;
+}
+
+function createManualPositionTable()
+{
+	$file = fopen('manualposition', 'r');
+	while(($line = fgets($file)) !== FALSE) {
+		preg_match('/^\s*Fragment[ _](\d+)[ _](\d+)-(\d+)\s+(\d+(\.\d+)?)%?\s+(\d+(\.\d+)?)%?\s*$/i', $line, $a);
+		$pagenum = (int) $a[1];
+		$firstline = (int) $a[2];
+		$lastline = (int) $a[3];
+		$man[$pagenum][$firstline][$lastline]['start'] = (double) $a[4] / 100.0;
+		$man[$pagenum][$firstline][$lastline]['length'] = (double) $a[6] / 100.0;
+	}
+	fclose($file);
+
+	return $man;
 }
 
 system('mkdir -p web/plagiate');
@@ -170,6 +198,7 @@ require_once('render.php');
 $polls =  getPrefixList('Fragment ');
 
 $r = createLineNumberTable();
+$man = createManualPositionTable();
 
 $i = 0;
 $pageids = '';
@@ -192,13 +221,14 @@ foreach($fragments as $f) {
 	$first = true;
 	$a = processString($f['revisions'][0]['*']);
 	if(isset($a[0]) && $a[0]) {
-		if(!isset($r[(int) $a[1]])) {
+		$pagenum = (int) $a[1];
+		if(!isset($r[$pagenum])) {
 			print "Keine Zeilenangaben fuer Seite ".$a[1]."!\n";
 		} else if(in_array($a[7], $whitelist)) {
 			$fr[$i]['pagenumber'] = $a[1];
 			$fr[$i]['lines'] = $a[2];
-			$fr[$i]['startpos'] = calcStartpos($a[2], $r[(int) $a[1]]);
-			$fr[$i]['length'] = calcLength($a[2], $r[(int) $a[1]]);
+			$fr[$i]['startpos'] = calcStartpos($a[2], $r[$pagenum], $man[$pagenum]);
+			$fr[$i]['length'] = calcLength($a[2], $r[$pagenum], $man[$pagenum]);
 			$fr[$i]['orig'] = $a[6];
 			$fr[$i]['category'] = $a[7];
 			$fr[$i]['inLit'] = $a[8];
@@ -223,7 +253,7 @@ for($page = 1; $page <= 475; $page++) {
 	$i = 0;
 	foreach($fr as $f)
 		if($f['pagenumber'] == $page) {
-			if($f['startpos'] + $f['length'] <= 910) {
+			if($f['startpos'] + $f['length'] <= HOEHE) {
 				prepare_png($page, $i++, $f);
 				$fragments[] = $f;
 			} else {
