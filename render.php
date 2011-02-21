@@ -32,9 +32,9 @@ function insert_script($pn, $num, $f)
     else
 	    $lit = '<img src="error.png" title="Quelle NICHT in Literaturverzeichnis vorhanden!" />';
     if(isset($f['url'])) {
-        $source .= '<div class="src"><a href="'.$f['url'].'">'.$quelle.'</a></div><div class="inlit">'.$lit.'</div>';
+        $source .= '<div class="src"><a href="'.$f['url'].'">'.$quelle.'</a> auf Seite '.$f['seitefund'].', Zeilen '.$f['zeilenfund'].'.</div><div class="inlit">'.$lit.'</div>';
     } else {
-        $source .= '<div class="src">'.$quelle.'</div><div class="inlit">'.$lit.'</div>';
+        $source .= '<div class="src">'.$quelle.' auf Seite '.$f['seitefund'].', Zeilen '.$f['zeilenfund'].'.</div><div class="inlit">'.$lit.'</div>';
     }
 
     return '		$(\'#plag'.$pn.'_'.$num.'\').hover(
@@ -97,7 +97,7 @@ function printout($fragments, $page)
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>Guttenberg Report</title>
+        <title>Seite '.$page.' -- Interaktiver Guttenberg Report</title>
         <link rel="stylesheet" href="gr.css" />
         <script src="http://code.jquery.com/jquery-1.5.min.js"></script>
         <script type="text/javascript">

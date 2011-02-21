@@ -205,6 +205,8 @@ foreach($fragments as $f) {
 			$fr[$i]['src'] = $a[9];
 			$fr[$i]['url'] = $a[10];
 			$fr[$i]['anmerkung'] = $a[11];
+			$fr[$i]['seitefund'] = $a[4];
+			$fr[$i]['zeilenfund'] = $a[5];
 			$i++;
 		} else {
 			print 'Ignoriere: ';
