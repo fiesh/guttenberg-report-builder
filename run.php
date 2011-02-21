@@ -2,7 +2,7 @@
 
 define('ABSATZ_LAENGE', 10);
 define('ZEILEN_LAENGE', 16.6);
-define('ZUSATZ', 10);
+define('ZUSATZ', 0);
 define('ZEILEN_MARGIN_OBEN', 95);
 define('FUSSNOTEN_MARGIN_UNTEN', 75);
 define('FUSSNOTEN_LAENGE', 14.4);
