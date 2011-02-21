@@ -55,13 +55,26 @@ body {
     border: 1px solid green;
 }
 
-#infoblock .orig {
-    margin-top: 60px;
+.orig {
+    background: white;
+    margin-top: 0px;
     padding-left:55px;
     padding-right:55px;
     font-size: 100%;
     color: #404000;
+    z-Index:50;
 }
+
+/*
+.origSelected {
+    background: yellow;
+    margin-top: 0px;
+    padding-left:55px;
+    padding-right:55px;
+    font-size: 100%;
+    color: #404000;
+    z-Index:200;
+}*/
 
 #infoblock .src {
     font-family: Helvetica, Arial, sans-serif;

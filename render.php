@@ -7,23 +7,37 @@ function insert_plag($pn, $num)
 
 function insert_orig($pn, $f, $num)
 {
-    return '				<div id="orig'.$pn.'_'.$num.'" class="orig">'.$f['orig'].'</div>'."\n";
+    $tooltip =  'Quelle: '.str_replace('"','',$f['src']);
+    if (isset($f['anmerkung']))
+        {
+            $tooltip .=  '
+Anmerkung: '.str_replace('"','',$f['anmerkung']);
+        }
+
+    $orig = $f['orig'];
+    return
+    '				<div
+              id="orig'.$pn.'_'.$num.'"
+              class="orig"
+              title="'.$tooltip.'"
+              >'.$orig.'</div>'."\n";
 }
 
 
 function insert_script($pn, $num, $f)
 {
+    $quelle =  str_replace('"','',$f['src']);
     $source = '';
     if(isset($f['url'])) {
-        $source .= '<div class="src"><a href="'.$f['url'].'">'.$f['src'].'</a></div>';
+        $source .= '<div class="src"><a href="'.$f['url'].'">'.$quelle.'</a></div>';
     } else {
-        $source .= '<div class="src">'.$f['src'].'</div>';
+        $source .= '<div class="src">'.$quelle.'</div>';
     }
 
     return '		$(\'#plag'.$pn.'_'.$num.'\').hover(
-		function () {
-		$(\'#infoblock-cat\').replaceWith(\'<div class="category" id="infoblock-cat">'.$f['category'].'</div>\');
-		$(\'#infoblock-src\').replaceWith(\'<div class="src" id="infoblock-src">'.$source.'</div>\');
+        function () {
+        $(\'#infoblock-cat\').replaceWith(\'<div class="category" id="infoblock-cat">'.$f['category'].'</div>\');
+        $(\'#infoblock-src\').replaceWith(\'<div class="src" id="infoblock-src">'.$source.'</div>\');
             deselect(activeOrig);
             activeOrig = $(\'#orig'.$pn.'_'.$num.'\');
             select(activeOrig);
@@ -87,12 +101,20 @@ function printout($fragments, $page)
 
         function deselect(origDiv)
         {
-            // ToDo: reset z-level and color; best would be to change class
+            // reset z-level and bgcolor;
+            if (origDiv) {
+                origDiv.css("background", "white");
+                origDiv.css("z-Index", "50");
+            }
         }
 
         function select(origDiv)
         {
-            // ToDo: increase z-level and highlight with color; best would be to change class
+            // increase z-level and highlight with bgcolor;
+            if (origDiv) {
+                origDiv.css("background", "yellow");
+                origDiv.css("z-Index", "500");
+            }
         }
 
         </script>
