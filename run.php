@@ -6,7 +6,7 @@ define('ZUSATZ', 0);
 define('ZEILEN_MARGIN_OBEN', 95);
 define('FUSSNOTEN_MARGIN_UNTEN', 75);
 define('FUSSNOTEN_LAENGE', 14.4);
-define('FUSSNOTEN_ABSATZ_LANGE', 3.5);
+define('FUSSNOTEN_ABSATZ_LAENGE', 3.5);
 define('HOEHE', 910);
 
 $whitelist = array('KomplettPlagiat', 'Verschleierung', 'HalbsatzFlickerei', 'ShakeAndPaste', 'ÜbersetzungsPlagiat', 'StrukturPlagiat', 'BauernOpfer', 'VerschärftesBauernOpfer');
@@ -31,7 +31,7 @@ function calcStartposFussnote($zeile, $fussnoten)
 		$count += $fussnoten[$i++];
 	}
 
-	return -$ZUSATZ + $startpos + (int) round(FUSSNOTEN_LAENGE * ($zeile-1) + $pos);
+	return -ZUSATZ + $startpos + (int) round(FUSSNOTEN_LAENGE * ($zeile-1) + $pos);
 }
 
 function calcStartposZeile($zeile, $zeilen)
