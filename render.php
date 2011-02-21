@@ -120,6 +120,7 @@ function printout($fragments, $page)
         </script>
     </head>
     <body>
+        <div class="home"><a href="/"><img src="up.png" border="0"/></a></div>
         <div class="guttenberg-titel">Karl-Theodor zu Guttenberg, Verfassung und Verfassungsvertrag, 2009</div>
         <div class="wrapper">
             <div id="page">

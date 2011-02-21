@@ -39,9 +39,11 @@ body {
 }
 
 .wrapper {
+    position: absolute:
+    top: 20px;
     width: 608px;
     float: left;
-        margin: 0 auto;
+    margin: 0 auto;
 }
 
 #infoblock {
@@ -91,6 +93,13 @@ body {
     left: 80px;
     width: 550px;
     z-Index:999;
+}
+
+.home {
+	position: absolute;
+	left: 635px;
+	top: 0px;
+	z-index:1000;
 }
 
 #infoblock .category {
