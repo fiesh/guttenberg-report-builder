@@ -1,7 +1,7 @@
 <?php
 
 define('ABSATZ_LAENGE', 10);
-define('ZEILEN_LAENGE', 16.8);
+define('ZEILEN_LAENGE', 16.6);
 define('ZUSATZ', 0);
 define('ZEILEN_MARGIN_OBEN', 95);
 define('FUSSNOTEN_MARGIN_UNTEN', 75);
@@ -162,23 +162,33 @@ function getEntries($pageids)
 	return unserialize(file_get_contents('http://de.guttenplag.wikia.com/api.php?action=query&prop=revisions&rvprop=content&format=php&pageids='.urlencode($pageids)));
 }
 
+function getWikitextPayloadLines($pagetitle)
+{
+	$wikitext = explode("\n", file_get_contents('http://de.guttenplag.wikia.com/index.php?action=raw&templates=expand&title='.urlencode($pagetitle)));
+	$result = array();
+	foreach($wikitext as $line) {
+		# remove comment lines
+		# (== headers ==, # comments, <pre>, </pre>, empty lines)
+		if(!(preg_match('/^\s*(==.*==|#.*|<\/?pre>)?\s*$/', $line))) {
+			$result[] = $line;
+		}
+	}
+	return $result;
+}
+
 function createLineNumberTable()
 {
-	$file = fopen('zeilenanzahl', 'r');
-	while(($line = fgets($file)) !== FALSE) {
+	foreach(getWikitextPayloadLines("Zeilenanzahl/Rohdaten") as $line) {
 		preg_match('/^\s*(\d+):(\d+):([\d,]*):([\d,]*)\s*$/', $line, $a);
 		$r[(int) $a[1]]['zeilen'] = explode(',', $a[3]);
 		$r[(int) $a[1]]['fussnoten'] = explode(',', $a[4]);
 	}
-	fclose($file);
-
 	return $r;
 }
 
 function createManualPositionTable()
 {
-	$file = fopen('manualposition', 'r');
-	while(($line = fgets($file)) !== FALSE) {
+	foreach(getWikitextPayloadLines("Visualisierungen/ReportBuilderManualPosition") as $line) {
 		preg_match('/^\s*Fragment[ _](\d+)[ _](\d+)-(\d+)\s+(\d+(\.\d+)?)%?\s+(\d+(\.\d+)?)%?\s*$/i', $line, $a);
 		$pagenum = (int) $a[1];
 		$firstline = (int) $a[2];
@@ -186,8 +196,6 @@ function createManualPositionTable()
 		$man[$pagenum][$firstline][$lastline]['start'] = (double) $a[4] / 100.0;
 		$man[$pagenum][$firstline][$lastline]['length'] = (double) $a[6] / 100.0;
 	}
-	fclose($file);
-
 	return $man;
 }
 
