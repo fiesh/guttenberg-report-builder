@@ -182,7 +182,8 @@ foreach($polls['query']['pages'] as $page) {
 	}
 }
 $entries = getEntries($pageids);
-$fragments = array_merge($fragments, $entries['query']['pages']);
+if(isset($entries['query']['pages']))
+	$fragments = array_merge($fragments, $entries['query']['pages']);
 
 $i = 0;
 foreach($fragments as $f) {
