@@ -11,7 +11,7 @@
 <div id="wrapper">
 	<h1>Interaktiver Guttenberg Report</h1>
 
-	<h2>Eine graphische Aufbereitung der im GuttenPlag Wiki gesammelten Daten zu Karl-Theodor Frhr. zu Guttenbergs Dissertation „Verfassung und Verfassungsvertrag“</h2>
+	<h2>Eine graphische Aufbereitung der im GuttenPlag Wiki gesammelten Daten zu Karl-Theodor Freiherr zu Guttenbergs Dissertation „Verfassung und Verfassungsvertrag“</h2>
 	<p>vielen Dank an vis4net, pettar, monopteros, Adalbert, Egon und viele andere Wikianer!</p>
 		<p><small>Bei den folgenden Seiten handelt es sich um vollständig automatisch generierte Darstellungen der im <a href="http://de.guttenplag.wikia.com/wiki/GuttenPlag_Wiki">Guttenplag Wiki</a> gefundenen Textstellen.<br />
 Die farblich gekennzeichneten Seiten enthalten nicht ausgewiesene Zitate oder Plagiate aus anderen Veröffentlichungen. <br />
