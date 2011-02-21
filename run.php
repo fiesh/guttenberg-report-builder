@@ -239,8 +239,7 @@ foreach($fragments as $f) {
 			$fr[$i]['zeilenfund'] = $a[5];
 			$i++;
 		} else {
-			print 'Ignoriere: ';
-			var_dump($a);
+			print "Ignoriere: $a[1] $a[2]\n";
 		}
 	}
 }
