@@ -1,7 +1,7 @@
 <?php
 
 define('ABSATZ_LAENGE', 10);
-define('ZEILEN_LAENGE', 16.8);
+define('ZEILEN_LAENGE', 16.6);
 define('ZUSATZ', 0);
 define('ZEILEN_MARGIN_OBEN', 95);
 define('FUSSNOTEN_MARGIN_UNTEN', 75);
