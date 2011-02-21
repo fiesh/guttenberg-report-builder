@@ -15,10 +15,11 @@
 	<p>vielen Dank an vis4net, pettar, monopteros, Adalbert, Egon und viele andere Wikianer!</p>
 		<p><small>Bei den folgenden Seiten handelt es sich um vollständig automatisch generierte Darstellungen der im <a href="http://de.guttenplag.wikia.com/wiki/GuttenPlag_Wiki">Guttenplag Wiki</a> gefundenen Textstellen.<br />
 Die farblich gekennzeichneten Seiten enthalten nicht ausgewiesene Zitate oder Plagiate aus anderen Veröffentlichungen. <br />
-	Die dunkelroten Symbole kennzeichnen Seiten, auf denen Plagiate unterschiedlicher Quellen gefunden wurden.</small></p>
+	Die dunkelroten Symbole kennzeichnen Seiten, auf denen Plagiate unterschiedlicher Quellen gefunden wurden.<br />
+Textstellen, die bisher nicht im Wiki kategorisiert wurden, werden verschwommen dargestellt.</small></p>
 
 <noscript>
-<p><small>(Die verlinkten Seiten nutzen JavaScript)</p>
+<p><small>(Die verlinkten Seiten nutzen JavaScript)</small></p>
 </noscript>
 
 <?php
