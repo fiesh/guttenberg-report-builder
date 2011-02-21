@@ -66,10 +66,10 @@ for ($p=1; $p<=475; $p++) {
 	
 	if (in_array($p, $plag_pages)) {
 		print '<div class="page plag'.(in_array($p, $multi_plags) ? " multi":"").'">';
-		print '<a href="'.sprintf("%03d",$p).'.html"><img src="icons/'.$class.'.png" alt="S. '.$p.', Sätze: '.$sentences.',  Wörter: '.$words.'" title="Seite '.$p.'" /></a></div>';
+		print '<a href="'.sprintf("%03d",$p).'.html"><img src="'.$class.'.png" alt="S. '.$p.', Sätze: '.$sentences.',  Wörter: '.$words.'" title="Seite '.$p.'" /></a></div>';
 	} else {
 		print '<div class="page">';
-		print '<a href="'.sprintf("%03d",$p).'.html"><img src="icons/'.$class.'.png" alt="S. '.$p.', Sätze: '.$sentences.',  Wörter: '.$words.'" title="Seite '.$p.'" /></a></div>';
+		print '<a href="'.sprintf("%03d",$p).'.html"><img src="'.$class.'.png" alt="S. '.$p.', Sätze: '.$sentences.',  Wörter: '.$words.'" title="Seite '.$p.'" /></a></div>';
 	}
 	
 	
