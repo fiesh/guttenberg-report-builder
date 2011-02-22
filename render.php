@@ -2,7 +2,7 @@
 
 function insert_plag($pn, $num)
 {
-    return '				<div id="plag'.$pn.'_'.$num.'" class="plag"><img src="plagiate/'.$pn.'_'.$num.'.png" /></div>'."\n";
+    return '				<div id="plag'.$pn.'_'.$num.'"><img src="plagiate/'.$pn.'_'.$num.'.png" /></div>'."\n";
 }
 
 function insert_orig($pn, $f, $num)
@@ -46,6 +46,7 @@ function insert_script($pn, $num, $f)
             select(activeOrig);
         },
         function () {
+            //$(\'#plag'.$pn.'_'.$num.'_rb\').replaceWith(\'<div id="plag'.$pn.'_'.$num.'"><img src="plagiate/'.$pn.'_'.$num.'.png" /></div>\');
         }
     );';
 }
@@ -54,15 +55,27 @@ function insert_css($pn, $num, $fragment)
 {
     return '		#plag'.$pn.'_'.$num.' {
             z-index: 5;
+            width: 600px;
+            padding-left: 2px;
+            padding-right: 2px;
             height: '.$fragment['length'].'px;
             position: absolute;
             top: '.$fragment['startpos'].'px;
         }
         #orig'.$pn.'_'.$num.' {
             z-index: 5;
-            top: '.($fragment['startpos']-5).'px;
-            min-height: '.$fragment['length'].'px;
+            top: '.$fragment['startpos'].'px;
+            height: '.$fragment['length'].'px;
             position: absolute;
+        }
+        #plag'.$pn.'_'.$num.'_rb {
+            z-index: 10;
+            width: 600px;
+            padding: 0;
+            height: '.($fragment['length']-4).'px;
+            position: absolute;
+            top: '.($fragment['startpos']-2).'px;
+            border: 2px solid red;
         }'."\n";
 }
 
