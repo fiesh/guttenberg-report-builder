@@ -17,7 +17,4 @@ foreach($fragments as $f) {
 	$ret .= "\n";
 }
 
-$file = fopen(CACHEFILE, 'w');
-fwrite($file, $ret);
-fclose($file);
 echo $ret;
