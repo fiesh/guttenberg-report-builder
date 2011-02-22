@@ -11,6 +11,8 @@ define('HOEHE', 910);
 
 $whitelist = array('KomplettPlagiat', 'Verschleierung', 'HalbsatzFlickerei', 'ShakeAndPaste', 'ÜbersetzungsPlagiat', 'StrukturPlagiat', 'BauernOpfer', 'VerschärftesBauernOpfer');
 
+require_once('FragmentLoader.php');
+
 function calcStartposFussnote($zeile, $fussnoten)
 {
 	$startpos = HOEHE - FUSSNOTEN_MARGIN_UNTEN + FUSSNOTEN_ABSATZ_LAENGE;
@@ -138,30 +140,6 @@ function prepare_png($pn, $num, $f)
 	system($cmd);
 }
 
-function processString($s)
-{
-	$needle = '';
-	for($i = 1; $i < 12; $i++)
-		$needle .= 'val_'.$i.'="([^"]*)"\s+';
-	preg_match_all("/$needle/", $s, $a);
-	for($i = 1; $i < 12; $i++) {
-		$a[$i] = trim($a[$i][0]);
-		if(strpos($a[$i], ',') !== false)
-			$a[$i] = '"'.$a[$i].'"';
-	}
-	return $a;
-}
-
-function getPrefixList($prefix)
-{
-	return unserialize(file_get_contents('http://de.guttenplag.wikia.com/api.php?action=query&prop=revisions&&format=php&generator=allpages&gaplimit=500&gapprefix='.urlencode($prefix)));
-}
-
-function getEntries($pageids)
-{
-	return unserialize(file_get_contents('http://de.guttenplag.wikia.com/api.php?action=query&prop=revisions&rvprop=content&format=php&pageids='.urlencode($pageids)));
-}
-
 function getWikitextPayloadLines($pagetitle)
 {
 	$wikitext = explode("\n", file_get_contents('http://de.guttenplag.wikia.com/index.php?action=raw&templates=expand&title='.urlencode($pagetitle)));
@@ -203,52 +181,33 @@ system('mkdir -p web/plagiate');
 
 require_once('render.php');
 
-$polls =  getPrefixList('Fragment ');
-
 $r = createLineNumberTable();
 $man = createManualPositionTable();
 
-$i = 0;
-$pageids = '';
-$fragments = array();
-foreach($polls['query']['pages'] as $page) {
-	$pageids .= $page['pageid'].'|';
-	if(++$i === 49) {
-		$i = 0;
-		$entries = getEntries($pageids);
-		$fragments = array_merge($fragments, $entries['query']['pages']);
-		$pageids = '';
-	}
-}
-$entries = getEntries($pageids);
-if(isset($entries['query']['pages']))
-	$fragments = array_merge($fragments, $entries['query']['pages']);
+$fragments = FragmentLoader::getFragments();
 
 $i = 0;
 foreach($fragments as $f) {
 	$first = true;
-	$a = processString($f['revisions'][0]['*']);
-	if(isset($a[0]) && $a[0]) {
-		$pagenum = (int) $a[1];
-		if(!isset($r[$pagenum])) {
-			print "Keine Zeilenangaben fuer Seite ".$a[1]."!\n";
-		} else if(in_array($a[7], $whitelist)) {
-			$fr[$i]['pagenumber'] = $a[1];
-			$fr[$i]['lines'] = $a[2];
-			$fr[$i]['startpos'] = calcStartpos($a[2], $r[$pagenum], $man[$pagenum]);
-			$fr[$i]['length'] = calcLength($a[2], $r[$pagenum], $man[$pagenum]);
-			$fr[$i]['orig'] = $a[6];
-			$fr[$i]['category'] = $a[7];
-			$fr[$i]['inLit'] = $a[8];
-			$fr[$i]['src'] = $a[9];
-			$fr[$i]['url'] = $a[10];
-			$fr[$i]['anmerkung'] = $a[11];
-			$fr[$i]['seitefund'] = $a[4];
-			$fr[$i]['zeilenfund'] = $a[5];
-			$i++;
-		} else {
-			print "Ignoriere: $a[1] $a[2]\n";
-		}
+	$pagenum = (int) $f[1];
+	if(!isset($r[$pagenum])) {
+		print "Keine Zeilenangaben fuer Seite ".$f[1]."!\n";
+	} else if(in_array($f[7], $whitelist)) {
+		$fr[$i]['pagenumber'] = $f[1];
+		$fr[$i]['lines'] = $f[2];
+		$fr[$i]['startpos'] = calcStartpos($f[2], $r[$pagenum], $man[$pagenum]);
+		$fr[$i]['length'] = calcLength($f[2], $r[$pagenum], $man[$pagenum]);
+		$fr[$i]['orig'] = $f[6];
+		$fr[$i]['category'] = $f[7];
+		$fr[$i]['inLit'] = $f[8];
+		$fr[$i]['src'] = $f[9];
+		$fr[$i]['url'] = $f[10];
+		$fr[$i]['anmerkung'] = $f[11];
+		$fr[$i]['seitefund'] = $f[4];
+		$fr[$i]['zeilenfund'] = $f[5];
+		$i++;
+	} else {
+		print "Ignoriere: $f[1] $f[2]\n";
 	}
 }
 
