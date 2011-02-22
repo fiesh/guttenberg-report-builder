@@ -32,10 +32,10 @@ body {
 }
 
 #next {
+    position: absolute;
     top: 431px;
     z-Index: 1000;
-    position: absolute;
-    right: 15px;
+    left: 559px;
 }
 
 .wrapper {
@@ -46,11 +46,20 @@ body {
     margin: 0 auto;
 }
 
+.plag {
+    margin: 0px;
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-top: 0;
+    padding-bottom: 0;
+    width: 600px;
+}
+
 #infoblock {
+    position: relative;
     float: center;
     margin-left: 616px;
-    padding-left:10px;
-    padding-right:10px;
+    padding: 0px;
     min-width: 600px;
     background: #ffffff;
     min-height: 910px;
@@ -59,36 +68,26 @@ body {
 
 .orig {
     background: white;
-    margin-top: 0px;
-    padding-left:55px;
-    padding-right:55px;
+    margin: 0px;
+    padding-left:65px;
+    padding-right:65px;
     font-size: 100%;
     color: #404000;
     z-Index:50;
 }
 
-/*
-.origSelected {
-    background: yellow;
-    margin-top: 0px;
-    padding-left:55px;
-    padding-right:55px;
-    font-size: 100%;
-    color: #404000;
-    z-Index:200;
-}*/
-
 #infoblock .src {
     font-family: Helvetica, Arial, sans-serif;
     margin-top: 40px;
+    margin-left: 10px;
     font-size: 100%;
 }
 
 #infoblock .inlit {
-	position: absolute;
-	top: 10px;
-	left: 760px;
-	z-index: 1000;
+    position: absolute;
+    top: 10px;
+    left: 760px;
+    z-index: 1000;
 }
 
 .guttenberg-titel
@@ -103,10 +102,10 @@ body {
 }
 
 .home {
-	position: absolute;
-	left: 635px;
-	top: 0px;
-	z-index:1000;
+    position: absolute;
+    left: 559px;
+    top: 15px;
+    z-index:1000;
 }
 
 #infoblock .category {
