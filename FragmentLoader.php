@@ -25,9 +25,9 @@ class FragmentLoader {
 		return unserialize(file_get_contents('http://de.guttenplag.wikia.com/api.php?action=query&prop=revisions&rvprop=content&format=php&pageids='.urlencode($pageids)));
 	}
 
-	static public function getFragments()
+	static private function getFragmentsWithPrefix($prefix)
 	{
-		$polls = self::getPrefixList('Fragment ');
+		$polls = self::getPrefixList($prefix);
 	
 		$i = 0;
 		$pageids = '';
@@ -45,11 +45,21 @@ class FragmentLoader {
 		if(isset($entries['query']['pages']))
 			$fragments = array_merge($fragments, $entries['query']['pages']);
 
+		$frags = array();
 		foreach($fragments as $f) {
 			$a = self::processString($f['revisions'][0]['*']);
 			if(isset($a[1]) && $a[1])
 				$frags[] = $a;
 		}
 		return $frags;
+	}
+
+	static public function getFragments()
+	{
+		$fragments = array();
+		for($i = 0; $i < 5; $i++)
+			$fragments = array_merge($fragments, self::getFragmentsWithPrefix("Fragment $i"));
+
+		return $fragments;
 	}
 }
