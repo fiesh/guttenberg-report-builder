@@ -9,7 +9,7 @@ define('FUSSNOTEN_LAENGE', 14.4);
 define('FUSSNOTEN_ABSATZ_LAENGE', 3.5);
 define('HOEHE', 910);
 
-$path = 'web';
+define('PATH', 'web');
 
 $whitelist = array('KomplettPlagiat', 'Verschleierung', 'HalbsatzFlickerei', 'ShakeAndPaste', 'ÜbersetzungsPlagiat', 'StrukturPlagiat', 'BauernOpfer', 'VerschärftesBauernOpfer');
 
@@ -91,7 +91,7 @@ function getFirstLastLine($z)
 
 function prepare_png($pn, $num, $f)
 {
-	$cmd = 'convert images/'.$pn.'.png -crop 600x'.$f['length'].'+0+'.$f['startpos'].' -quality 100 -define png:bit-depth=8 '.$path.'/plagiate/'.$pn.'_'.$num.'.png';
+	$cmd = 'convert images/'.$pn.'.png -crop 600x'.$f['length'].'+0+'.$f['startpos'].' -quality 100 -define png:bit-depth=8 '.PATH.'/plagiate/'.$pn.'_'.$num.'.png';
 
 	system($cmd);
 }
@@ -133,7 +133,7 @@ function createManualPositionTable()
 	return $manualpos;
 }
 
-system('mkdir -p '.$path.'/plagiate');
+system('mkdir -p '.PATH.'/plagiate');
 
 $linetable = createLineNumberTable();
 $manualpos = createManualPositionTable();
@@ -186,7 +186,7 @@ for($page = 1; $page <= 475; $page++) {
 		}
 
 	$output = printout($fragments, $page);
-	$file = fopen("$path/$page.html", 'w'); 
+	$file = fopen(PATH."/$page.html", 'w'); 
 	fwrite($file, $output);
 	fclose($file);
 }
