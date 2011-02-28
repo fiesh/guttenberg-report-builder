@@ -8,7 +8,7 @@ class FragmentLoader {
 			$needle .= 'val_'.$i.'="([^"]*)"\s+';
 		preg_match_all("/$needle/", $s, $a);
 		for($i = 0; $i < 12; $i++) {
-			$a[$i] = trim($a[$i][0]);
+			$a[$i] = trim(@$a[$i][0]);
 			if(strpos($a[$i], ',') !== false)
 				$a[$i] = '"'.$a[$i].'"';
 		}
@@ -47,7 +47,7 @@ class FragmentLoader {
 
 		$frags = array();
 		foreach($fragments as $f) {
-			$a = self::processString($f['revisions'][0]['*']);
+			$a = self::processString(@$f['revisions'][0]['*']);
 			if(isset($a[1]) && $a[1])
 				$frags[] = $a;
 		}
