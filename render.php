@@ -60,11 +60,11 @@ function insert_css($pn, $num, $fragment)
             padding-right: 2px;
             height: '.$fragment['length'].'px;
             position: absolute;
-            top: '.$fragment['startpos'].'px;
+            top: '.($fragment['startpos']+8).'px;
         }
         #orig'.$pn.'_'.$num.' {
             z-index: 5;
-            top: '.$fragment['startpos'].'px;
+            top: '.($fragment['startpos']+8).'px;
             height: '.$fragment['length'].'px;
             position: absolute;
         }

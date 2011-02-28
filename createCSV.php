@@ -17,4 +17,6 @@ foreach($fragments as $f) {
 	$ret .= "\n";
 }
 
+echo 'Seite,Zeilen,TextDissertation,SeiteFundstelle,ZeilenFundstelle,TextFundstelle,Kategorie,ImLiteraturverzeichnis,Quelle,URL,Anmerkung'."\n";
+
 echo $ret;

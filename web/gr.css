@@ -35,7 +35,7 @@ body {
     top: 431px;
     z-Index: 1000;
     position: absolute;
-    right: 15px;
+    left: 559px;
 }
 
 .wrapper {
@@ -104,8 +104,8 @@ body {
 
 .home {
 	position: absolute;
-	left: 635px;
-	top: 0px;
+	left: 559px;
+	top: 15px;
 	z-index:1000;
 }
 
@@ -134,4 +134,3 @@ body {
     margin: 0px;
     padding: 0px;
 }*/
-
