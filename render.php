@@ -26,15 +26,18 @@ function insert_orig($pn, $f, $num)
 function insert_script($pn, $num, $f)
 {
     $quelle =  str_replace('"','',$f['src']);
-    $source = '';
     if($f['inLit'] === 'ja')
 	    $lit = '<img src="accept.png" title="Quelle in Literaturverzeichnis vorhanden." />';
     else
 	    $lit = '<img src="error.png" title="Quelle NICHT in Literaturverzeichnis vorhanden!" />';
+    if(isset($f['zeilenfund']) && $f['zeilenfund'])
+        $foundat = 'Seite '.$f['seitefund'].', Zeilen '.$f['zeilenfund'];
+    else
+        $foundat = 'Seite '.$f['seitefund'];
     if(isset($f['url'])) {
-        $source .= '<div class="src"><a href="'.$f['url'].'">'.$quelle.'</a> auf Seite '.$f['seitefund'].', Zeilen '.$f['zeilenfund'].'.</div><div class="inlit">'.$lit.'</div>';
+        $source = '<div class="src"><a href="'.$f['url'].'">'.$quelle.'</a> auf '.$foundat.'.</div><div class="inlit">'.$lit.'</div>';
     } else {
-        $source .= '<div class="src">'.$quelle.' auf Seite '.$f['seitefund'].', Zeilen '.$f['zeilenfund'].'.</div><div class="inlit">'.$lit.'</div>';
+        $source = '<div class="src">'.$quelle.' auf '.$foundat.'.</div><div class="inlit">'.$lit.'</div>';
     }
 
     return '		$(\'#plag'.$pn.'_'.$num.'\').hover(
