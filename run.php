@@ -100,8 +100,8 @@ function getWikitextPayloadLines($pagetitle)
 	$result = array();
 	foreach($wikitext as $line) {
 		# remove comment lines
-		# (== headers ==, # comments, <pre>, </pre>, empty lines)
-		if(!(preg_match('/^\s*(==.*==|#.*|<\/?pre>)?\s*$/', $line))) {
+		# (== headers ==, # comments, <pre>, </pre>, [[Kategorie:...]], empty lines)
+		if(!(preg_match('/^\s*(==.*==|#.*|<\/?pre>|\[\[Kategorie:\w+\]\])?\s*$/', $line))) {
 			$result[] = $line;
 		}
 	}
