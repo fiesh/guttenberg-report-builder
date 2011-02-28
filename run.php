@@ -18,74 +18,116 @@ require_once('render.php');
 
 function calcPositionZeile($zeile, $zeilen)
 {
-	$pos = ZEILEN_MARGIN_OBEN;
-	$count = $zeilen[0];
-	$i = 1;
-	while($count < $zeile) {
-		$pos += ABSATZ_LAENGE;
-		if(!isset($zeilen[$i]) || $zeilen[$i] === 0) {
-			print "Fehler, Zeile $zeile liegt nicht in einem definierten Absatz!\n";
-			break;
+	$top = ZEILEN_MARGIN_OBEN;
+	$sum = 0;
+	for ($i = 0; $i < count($zeilen); ++$i) {
+		$sum += $zeilen[$i];
+		if ($zeile <= $sum) {
+			return $top + ABSATZ_LAENGE * $i
+			            + ZEILEN_LAENGE * ($zeile-1);
 		}
-		$count += $zeilen[$i++];
 	}
 
-	return $pos + ZEILEN_LAENGE * ($zeile-1);
+	// line number not in a defined paragraph
+	return false;
 }
 
 function calcPositionFussnote($zeile, $fussnoten)
 {
-	$pos = HOEHE - FUSSNOTEN_MARGIN_UNTEN + FUSSNOTEN_ABSATZ_LAENGE;
+	$top = HOEHE - FUSSNOTEN_MARGIN_UNTEN + FUSSNOTEN_ABSATZ_LAENGE;
 	foreach($fussnoten as $i) {
-		$pos -= $i * FUSSNOTEN_LAENGE;
-		$pos -= FUSSNOTEN_ABSATZ_LAENGE;
+		$top -= $i * FUSSNOTEN_LAENGE;
+		$top -= FUSSNOTEN_ABSATZ_LAENGE;
 	}
 
-	$count = $fussnoten[0];
-	$i = 1;
-	while($count < $zeile) {
-		$pos += FUSSNOTEN_ABSATZ_LAENGE;
-		if(!isset($fussnoten[$i]) || $fussnoten[$i] === 0) {
-			print "Fehler, Fussnote $zeile liegt nicht in einem definierten Absatz!\n";
-			break;
+	$sum = 0;
+	for ($i = 0; $i < count($fussnoten); ++$i) {
+		$sum += $fussnoten[$i];
+		if ($zeile <= $sum) {
+			return $top + FUSSNOTEN_ABSATZ_LAENGE * $i
+			            + FUSSNOTEN_LAENGE * ($zeile-1);
 		}
-		$count += $fussnoten[$i++];
 	}
 
-	return $pos + FUSSNOTEN_LAENGE * ($zeile-1);
+	// line number not in a defined paragraph
+	return false;
 }
 
-function calcExtents($pagenum, $firstline, $lastline, $linetable, $manualpos)
+function calcPosition($linenumber, $linetableEntry, $offset)
 {
+	if($linenumber > 100) { // Fussnote
+		$pos = calcPositionFussnote($linenumber-100, $linetableEntry['fussnoten']);
+		if ($pos === false)
+			return false;
+		return $pos + $offset * FUSSNOTEN_LAENGE;
+	} else {
+		$pos = calcPositionZeile($linenumber, $linetableEntry['zeilen']);
+		if ($pos === false)
+			return false;
+		return $pos + $offset * ZEILEN_LAENGE;
+	}
+}
+
+function calcExtents($fp, $fl, $linetable, $manualpos)
+{
+	// parse page number
+	if (preg_match('/^\s*(\d+)\s*$/', $fp, $a)) {
+		$pagenum = (int) $a[1];
+	} else {
+		print "Fragment $fp $fl: Fehlerhaftes Feld 'Seiten Dissertation'!\n";
+		return false;
+	}
+
+	// parse first and last line
+	if(preg_match('/^\s*(\d+)\s*-\s*(\d+)\s*$/', $fl, $a)) {
+		$firstline = (int) $a[1];
+		$lastline = (int) $a[2];
+	} else if (preg_match('/^\s*(\d+)\s*$/', $fl, $a)) {
+		$firstline = (int) $a[1];
+		$lastline = (int) $a[1];
+	} else {
+		print "Fragment $fp $fl: Fehlerhaftes Feld 'Zeilen Dissertation'!\n";
+		return false;
+	}
+
+	// calculate start position and length
 	if(isset($manualpos[$pagenum][$firstline][$lastline])) {
 		$manualposEntry = $manualpos[$pagenum][$firstline][$lastline];
 		$startpos = HOEHE * $manualposEntry['startpos'];
 		$length = HOEHE * $manualposEntry['length'];
-	} else {
+
+	} else if(isset($linetable[$pagenum])) {
 		$linetableEntry = $linetable[$pagenum];
-		if($firstline > 100) // Fussnote
-			$startpos = calcPositionFussnote($firstline-100, $linetableEntry['fussnoten']);
-		else
-			$startpos = calcPositionZeile($firstline, $linetableEntry['zeilen']);
-		if($lastline > 100) // Fussnote
-			$length = calcPositionFussnote($lastline-100, $linetableEntry['fussnoten']) + FUSSNOTEN_LAENGE - $startpos;
-		else
-			$length = calcPositionZeile($lastline, $linetableEntry['zeilen']) + ZEILEN_LAENGE - $startpos;
+
+		$startpos = calcPosition($firstline, $linetableEntry, 0);
+		$endpos = calcPosition($lastline, $linetableEntry, 1);
+
+		if ($startpos === false)
+			print "Fragment $fp $fl: Fehler, Zeile $firstline liegt nicht in einem definierten Absatz!\n";
+		if ($endpos === false)
+			print "Fragment $fp $fl: Fehler, Zeile $lastline liegt nicht in einem definierten Absatz!\n";
+		if ($startpos === false || $endpos === false)
+			return false;
+
+		$length = $endpos - $startpos;
+
+	} else {
+		print "Fragment $fp $fl: Keine Zeilenangaben fuer Seite $pagenum!\n";
+		return false;
 	}
 
-	$extents['startpos'] = round($startpos - ZUSATZ);
-	$extents['length'] = round($length + 2*ZUSATZ);
-	return $extents;
-}
+	// enlarge extents by ZUSATZ on both sides, round to nearest integers
+	$extents['startpos'] = (int) round($startpos - ZUSATZ);
+	$extents['length'] = (int) round($length + 2*ZUSATZ);
 
-function getFirstLastLine($z)
-{
-	if(preg_match('/^\s*(\d+)\s*-\s*(\d+)\s*$/', $z, $a)) {
-		return array((int) $a[1], (int) $a[2]);
-	} else if (preg_match('/^\s*(\d+)\s*$/', $z, $a)) {
-		return array((int) $a[1], (int) $a[1]);
-	} else {
+	if($extents['startpos'] + $extents['length'] > HOEHE) {
+		print "Fragment $fp $fl liegt ausserhalb des Seitenbereichs!\n";
 		return false;
+	} else if($extents['length'] < 0) {
+		print "Fragment $fp $fl hat negative Laenge!\n";
+		return false;
+	} else {
+		return $extents;
 	}
 }
 
@@ -142,18 +184,11 @@ $fragments = FragmentLoader::getFragments();
 
 $i = 0;
 foreach($fragments as $f) {
-	$pagenum = (int) $f[1];
-	list($firstline, $lastline) = getFirstLastLine($f[2]);
-
 	if(!in_array($f[7], $whitelist)) {
 		print "Fragment $f[1] $f[2]: Ignoriere, Plagiatstyp '$f[7]'\n";
-	} else if(!isset($linetable[$pagenum])) {
-		print "Fragment $f[1] $f[2]: Keine Zeilenangaben fuer Seite $f[1]!\n";
-	} else if(!$firstline || !$lastline) {
-		print "Fragment $f[1] $f[2]: Fehlerhaftes Feld 'Zeilen Dissertation'!\n";
 	} else {
-		$extents = calcExtents($pagenum, $firstline, $lastline, $linetable, $manualpos);
-		if ($extents['startpos'] + $extents['length'] <= HOEHE) {
+		$extents = calcExtents($f[1], $f[2], $linetable, $manualpos);
+		if ($extents) {
 			$fr[$i]['pagenumber'] = $f[1];
 			$fr[$i]['lines'] = $f[2];
 			$fr[$i]['startpos'] = $extents['startpos'];
@@ -167,8 +202,6 @@ foreach($fragments as $f) {
 			$fr[$i]['seitefund'] = $f[4];
 			$fr[$i]['zeilenfund'] = $f[5];
 			$i++;
-		} else {
-			print "Fragment $f[1] $f[2] liegt ausserhalb des Seitenbereichs!\n";
 		}
 	}
 }
