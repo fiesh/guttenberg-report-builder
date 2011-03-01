@@ -2,7 +2,8 @@
 
 define('ZEILEN_LAENGE', 16.6);
 define('FUSSNOTEN_LAENGE', 14.4);
-define('ZUSATZ', 0);
+define('ZUSATZ_OBEN', 2);
+define('ZUSATZ_UNTEN', 0);
 define('HOEHE', 910);
 
 define('PATH', 'web');
@@ -85,8 +86,8 @@ function calcExtents($fp, $fl, $linepositions)
 	}
 
 	// enlarge extents by ZUSATZ on both sides, round to nearest integers
-	$extents['startpos'] = (int) round($startpos - ZUSATZ);
-	$extents['length'] = (int) round($length + 2*ZUSATZ);
+	$extents['startpos'] = (int) round($startpos - ZUSATZ_OBEN);
+	$extents['length'] = (int) round($length + ZUSATZ_OBEN + ZUSATZ_UNTEN);
 
 	if($extents['startpos'] + $extents['length'] > HOEHE) {
 		print "Fragment $fp $fl liegt ausserhalb des Seitenbereichs!\n";
