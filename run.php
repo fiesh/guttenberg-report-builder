@@ -1,12 +1,8 @@
 <?php
 
-define('ABSATZ_LAENGE', 10);
 define('ZEILEN_LAENGE', 16.6);
-define('ZUSATZ', 0);
-define('ZEILEN_MARGIN_OBEN', 95);
-define('FUSSNOTEN_MARGIN_UNTEN', 75);
 define('FUSSNOTEN_LAENGE', 14.4);
-define('FUSSNOTEN_ABSATZ_LAENGE', 3.5);
+define('ZUSATZ', 0);
 define('HOEHE', 910);
 
 define('PATH', 'web');
@@ -16,59 +12,28 @@ $whitelist = array('KomplettPlagiat', 'Verschleierung', 'HalbsatzFlickerei', 'Sh
 require_once('FragmentLoader.php');
 require_once('render.php');
 
-function calcPositionZeile($zeile, $zeilen)
-{
-	$top = ZEILEN_MARGIN_OBEN;
-	$sum = 0;
-	for ($i = 0; $i < count($zeilen); ++$i) {
-		$sum += $zeilen[$i];
-		if ($zeile <= $sum) {
-			return $top + ABSATZ_LAENGE * $i
-			            + ZEILEN_LAENGE * ($zeile-1);
-		}
-	}
-
-	// line number not in a defined paragraph
-	return false;
-}
-
-function calcPositionFussnote($zeile, $fussnoten)
-{
-	$top = HOEHE - FUSSNOTEN_MARGIN_UNTEN + FUSSNOTEN_ABSATZ_LAENGE;
-	foreach($fussnoten as $i) {
-		$top -= $i * FUSSNOTEN_LAENGE;
-		$top -= FUSSNOTEN_ABSATZ_LAENGE;
-	}
-
-	$sum = 0;
-	for ($i = 0; $i < count($fussnoten); ++$i) {
-		$sum += $fussnoten[$i];
-		if ($zeile <= $sum) {
-			return $top + FUSSNOTEN_ABSATZ_LAENGE * $i
-			            + FUSSNOTEN_LAENGE * ($zeile-1);
-		}
-	}
-
-	// line number not in a defined paragraph
-	return false;
-}
-
-function calcPosition($linenumber, $linetableEntry, $offset)
+function calcPosition($linenumber, $linepositionsEntry, $offset)
 {
 	if($linenumber > 100) { // Fussnote
-		$pos = calcPositionFussnote($linenumber-100, $linetableEntry['fussnoten']);
-		if ($pos === false)
-			return false;
-		return $pos + $offset * FUSSNOTEN_LAENGE;
+		$subentry = $linepositionsEntry['fussnoten'];
+		$subindex = $linenumber - 101;
+		$offsetheight = FUSSNOTEN_LAENGE;
 	} else {
-		$pos = calcPositionZeile($linenumber, $linetableEntry['zeilen']);
-		if ($pos === false)
-			return false;
-		return $pos + $offset * ZEILEN_LAENGE;
+		$subentry = $linepositionsEntry['zeilen'];
+		$subindex = $linenumber - 1;
+		$offsetheight = ZEILEN_LAENGE;
+	}
+
+	if(isset($subentry[$subindex])) {
+		return HOEHE * $subentry[$subindex] / 100.0
+			+ $offset * $offsetheight;
+	} else {
+		// Zeile existiert nicht
+		return false;
 	}
 }
 
-function calcExtents($fp, $fl, $linetable, $manualpos)
+function calcExtents($fp, $fl, $linepositions)
 {
 	// parse page number
 	if (preg_match('/^\s*(\d+)\s*$/', $fp, $a)) {
@@ -89,25 +54,28 @@ function calcExtents($fp, $fl, $linetable, $manualpos)
 		print "Fragment $fp $fl: Fehlerhaftes Feld 'Zeilen Dissertation'!\n";
 		return false;
 	}
+	if($firstline > $lastline) {
+		print "Fragment $fp $fl: Startzeile ist > Endzeile!\n";
+		return false;
+	}
 
 	// calculate start position and length
-	if(isset($manualpos[$pagenum][$firstline][$lastline])) {
-		$manualposEntry = $manualpos[$pagenum][$firstline][$lastline];
-		$startpos = HOEHE * $manualposEntry['startpos'];
-		$length = HOEHE * $manualposEntry['length'];
+	if(isset($linepositions[$pagenum])) {
+		$linepositionsEntry = $linepositions[$pagenum];
 
-	} else if(isset($linetable[$pagenum])) {
-		$linetableEntry = $linetable[$pagenum];
+		$startpos = calcPosition($firstline, $linepositionsEntry, 0);
+		$endpos = calcPosition($lastline, $linepositionsEntry, 1);
+		$endpos2 = calcPosition($lastline+1, $linepositionsEntry, 0);
 
-		$startpos = calcPosition($firstline, $linetableEntry, 0);
-		$endpos = calcPosition($lastline, $linetableEntry, 1);
-
-		if ($startpos === false)
+		if($startpos === false)
 			print "Fragment $fp $fl: Fehler, Zeile $firstline liegt nicht in einem definierten Absatz!\n";
-		if ($endpos === false)
+		if($endpos === false)
 			print "Fragment $fp $fl: Fehler, Zeile $lastline liegt nicht in einem definierten Absatz!\n";
-		if ($startpos === false || $endpos === false)
+		if($startpos === false || $endpos === false)
 			return false;
+
+		if($endpos2 !== false)
+			$endpos = max($endpos, $endpos2);
 
 		$length = $endpos - $startpos;
 
@@ -144,41 +112,33 @@ function getWikitextPayloadLines($pagetitle)
 	$result = array();
 	foreach($wikitext as $line) {
 		# remove comment lines
-		# (== headers ==, # comments, <pre>, </pre>, [[Kategorie:...]], empty lines)
-		if(!(preg_match('/^\s*(==.*==|#.*|<\/?pre>|\[\[Kategorie:\w+\]\])?\s*$/', $line))) {
+		# (== headers ==, # comments, <pre>, </pre>,
+		# <nowiki>, </nowiki>, [[Kategorie:...]], empty lines)
+		if(!(preg_match('/^\s*(==.*==|#.*|<\/?pre>|<\/?nowiki>|\[\[Kategorie:\w+\]\])?\s*$/', $line))) {
 			$result[] = $line;
 		}
 	}
 	return $result;
 }
 
-function createLineNumberTable()
+function createLinePositionTable()
 {
-	foreach(getWikitextPayloadLines("Zeilenanzahl/Rohdaten") as $line) {
-		preg_match('/^\s*(\d+):(\d+):([\d,]*):([\d,]*)\s*$/', $line, $a);
-		$linetable[(int) $a[1]]['zeilen'] = explode(',', $a[3]);
-		$linetable[(int) $a[1]]['fussnoten'] = explode(',', $a[4]);
+	foreach(getWikitextPayloadLines("Zeilenpositionen") as $line) {
+		if(preg_match('/^\s*(\d+):([\d.,]*):([\d.,]*)\s*$/', $line, $match)) {
+			$pagenum = (int) $match[1];
+			$linepositions[$pagenum]['zeilen'] = explode(',', $match[2]);
+			$linepositions[$pagenum]['fussnoten'] = explode(',', $match[3]);
+		} else {
+			print "Syntaxfehler in wiki/Zeilenpositionen:\n";
+			print "  '$line'\n";
+		}
 	}
-	return $linetable;
-}
-
-function createManualPositionTable()
-{
-	foreach(getWikitextPayloadLines("Visualisierungen/ReportBuilderManualPosition") as $line) {
-		preg_match('/^\s*Fragment[ _](\d+)[ _](\d+)-(\d+)\s+(\d+(\.\d+)?)%?\s+(\d+(\.\d+)?)%?\s*$/i', $line, $a);
-		$pagenum = (int) $a[1];
-		$firstline = (int) $a[2];
-		$lastline = (int) $a[3];
-		$manualpos[$pagenum][$firstline][$lastline]['startpos'] = (double) $a[4] / 100.0;
-		$manualpos[$pagenum][$firstline][$lastline]['length'] = (double) $a[6] / 100.0;
-	}
-	return $manualpos;
+	return $linepositions;
 }
 
 system('mkdir -p '.PATH.'/plagiate');
 
-$linetable = createLineNumberTable();
-$manualpos = createManualPositionTable();
+$linepositions = createLinePositionTable();
 
 $fragments = FragmentLoader::getFragments();
 
@@ -187,7 +147,7 @@ foreach($fragments as $f) {
 	if(!in_array($f[7], $whitelist)) {
 		print "Fragment $f[1] $f[2]: Ignoriere, Plagiatstyp '$f[7]'\n";
 	} else {
-		$extents = calcExtents($f[1], $f[2], $linetable, $manualpos);
+		$extents = calcExtents($f[1], $f[2], $linepositions);
 		if ($extents) {
 			$fr[$i]['pagenumber'] = $f[1];
 			$fr[$i]['lines'] = $f[2];
