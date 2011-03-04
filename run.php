@@ -142,10 +142,9 @@ system('mkdir -p '.PATH.'/plagiate');
 
 $linepositions = createLinePositionTable();
 
-$fragments = FragmentLoader::getFragments();
-
+// Lade Fragmente aus Wiki, Vorverarbeitung und Berechnung der Fragmentposition
 $i = 0;
-foreach($fragments as $f) {
+foreach(FragmentLoader::getFragments() as $f) {
 	if(!in_array($f[7], $whitelist)) {
 		print "Fragment $f[1] $f[2]: Ignoriere, Plagiatstyp '$f[7]'\n";
 	} else {
@@ -168,8 +167,21 @@ foreach($fragments as $f) {
 	}
 }
 
-$fragments = array();
+// Berechne minimale Hoehe der Originaltext-divs
+// == min(Fragmenthoehe, naechste Startposition - aktuelle Startposition)
+for($i = 0; $i < count($fr); ++$i) {
+	$origlength = $fr[$i]['length'];
+	for($j = 0; $j < count($fr); ++$j) {
+		if($fr[$j]['pagenumber'] == $fr[$i]['pagenumber']
+		    && $fr[$j]['startpos'] > $fr[$i]['startpos']) {
+			$origlength = min($origlength,
+				$fr[$j]['startpos'] - $fr[$i]['startpos']);
+		}
+	}
+	$fr[$i]['origlength'] = $origlength;
+}
 
+// Gib ein HTML-Dokument pro Dissertationsseite aus, mit Fragmenten
 for($page = 1; $page <= 475; $page++) {
 	$fragments = array();
 	$page = sprintf('%03d', $page);

@@ -64,7 +64,7 @@ function insert_css($pn, $num, $fragment)
         #orig'.$pn.'_'.$num.' {
             z-index: 5;
             top: '.($fragment['startpos']-3).'px;
-            min-height: '.$fragment['length'].'px;
+            min-height: '.$fragment['origlength'].'px;
             position: absolute;
         }'."\n";
 }
