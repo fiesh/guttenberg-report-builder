@@ -6,7 +6,7 @@ html, body {
 }
 
 body {
-    background: white
+    background: white;
     text-align: left;
 }
 
@@ -27,19 +27,25 @@ body {
 #prev {
     position: absolute;
     top: 431px;
-    z-Index: 1000;
     left: 15px;
+    z-Index: 1000;
 }
 
 #next {
-    top: 431px;
-    z-Index: 1000;
     position: absolute;
+    top: 431px;
     left: 559px;
+    z-Index: 1000;
 }
 
-.wrapper {
-    position: absolute:
+#home {
+    position: absolute;
+    top: 15px;
+    left: 559px;
+    z-index: 1000;
+}
+
+#wrapper {
     top: 20px;
     width: 608px;
     float: left;
@@ -47,52 +53,41 @@ body {
 }
 
 #infoblock {
+    position: relative;
     float: center;
     margin-left: 616px;
-    padding-left:10px;
-    padding-right:10px;
+    padding: 0px;
     min-width: 600px;
     background: #ffffff;
     min-height: 910px;
     border: 1px solid green;
 }
 
-.orig {
+#infoblock .orig {
     background: white;
-    margin-top: 0px;
-    padding-left:55px;
-    padding-right:55px;
+    margin: 0px;
+    padding-left: 65px;
+    padding-right: 65px;
     font-size: 100%;
     color: #404000;
     z-Index:50;
 }
 
-/*
-.origSelected {
-    background: yellow;
-    margin-top: 0px;
-    padding-left:55px;
-    padding-right:55px;
-    font-size: 100%;
-    color: #404000;
-    z-Index:200;
-}*/
-
 #infoblock .src {
     font-family: Helvetica, Arial, sans-serif;
     margin-top: 40px;
+    margin-left: 10px;
     font-size: 100%;
 }
 
 #infoblock .inlit {
-	position: absolute;
-	top: 10px;
-	left: 760px;
-	z-index: 1000;
+    position: absolute;
+    top: 5px;
+    left: 120px;
+    z-index: 1000;
 }
 
-.guttenberg-titel
-{
+#guttenberg-titel {
     font-family:  Helvetica, Arial, sans-serif;
     position: absolute;
     font-size: 100%;
@@ -100,13 +95,6 @@ body {
     left: 80px;
     width: 550px;
     z-Index:999;
-}
-
-.home {
-	position: absolute;
-	left: 559px;
-	top: 15px;
-	z-index:1000;
 }
 
 #infoblock .category {
@@ -121,16 +109,3 @@ body {
     font-size: 80%;
     color: #101080;
 }
-
-/*
-.navigation {
-    position: relative;
-    float: center;
-    margin: 20px 40px 20px 40px;
-    width: 120px;
-    top: 0px;
-    left: 0px;
-    border: none;
-    margin: 0px;
-    padding: 0px;
-}*/

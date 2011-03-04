@@ -2,7 +2,7 @@
 
 function insert_plag($pn, $num)
 {
-    return '				<div id="plag'.$pn.'_'.$num.'"><img src="plagiate/'.$pn.'_'.$num.'.png" /></div>'."\n";
+    return '				<div id="plag'.$pn.'_'.$num.'" class="plag"><img src="plagiate/'.$pn.'_'.$num.'.png" /></div>'."\n";
 }
 
 function insert_orig($pn, $f, $num)
@@ -49,7 +49,6 @@ function insert_script($pn, $num, $f)
             select(activeOrig);
         },
         function () {
-            //$(\'#plag'.$pn.'_'.$num.'_rb\').replaceWith(\'<div id="plag'.$pn.'_'.$num.'"><img src="plagiate/'.$pn.'_'.$num.'.png" /></div>\');
         }
     );';
 }
@@ -58,40 +57,16 @@ function insert_css($pn, $num, $fragment)
 {
     return '		#plag'.$pn.'_'.$num.' {
             z-index: 5;
-            width: 600px;
-            padding-left: 2px;
-            padding-right: 2px;
             height: '.$fragment['length'].'px;
             position: absolute;
             top: '.($fragment['startpos']+8).'px;
         }
         #orig'.$pn.'_'.$num.' {
             z-index: 5;
-            top: '.($fragment['startpos']+8).'px;
-            height: '.$fragment['length'].'px;
+            top: '.($fragment['startpos']-3).'px;
+            min-height: '.$fragment['length'].'px;
             position: absolute;
-        }
-        #plag'.$pn.'_'.$num.'_rb {
-            z-index: 10;
-            width: 600px;
-            padding: 0;
-            height: '.($fragment['length']-4).'px;
-            position: absolute;
-            top: '.($fragment['startpos']-2).'px;
-            border: 2px solid red;
         }'."\n";
-}
-
-function prepare_expl($f)
-{
-    $info = '<div class="category">'.$f['category'].'</div>';
-    if(isset($f['url'])) {
-        $info .= '<div class="src"><a href="'.$f['url'].'">'.$f['src'].'</a></div>';
-    } else {
-        $info .= '<div class="src">'.$f['src'].'</div>';
-    }
-    $info .= '<div class="orig">'.$f['orig'].'</div>';
-    return $info;
 }
 
 function printout($fragments, $page)
@@ -126,9 +101,9 @@ function printout($fragments, $page)
         </script>
     </head>
     <body>
-        <div class="home"><a href="/"><img src="up.png" border="0"/></a></div>
-        <div class="guttenberg-titel">Karl-Theodor zu Guttenberg, Verfassung und Verfassungsvertrag, 2009</div>
-        <div class="wrapper">
+        <div id="home"><a href="/"><img src="up.png" border="0"/></a></div>
+        <div id="guttenberg-titel">Karl-Theodor zu Guttenberg, Verfassung und Verfassungsvertrag, 2009</div>
+        <div id="wrapper">
             <div id="page">
 ';
     $i = 0;
