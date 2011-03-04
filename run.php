@@ -11,6 +11,7 @@ define('PATH', 'web');
 $whitelist = array('KomplettPlagiat', 'Verschleierung', 'HalbsatzFlickerei', 'ShakeAndPaste', 'ÜbersetzungsPlagiat', 'StrukturPlagiat', 'BauernOpfer', 'VerschärftesBauernOpfer');
 
 require_once('FragmentLoader.php');
+require_once('WikiLoader.php');
 require_once('render.php');
 
 function calcPosition($linenumber, $linepositionsEntry, $offset)
@@ -76,7 +77,7 @@ function calcExtents($fp, $fl, $linepositions)
 			return false;
 
 		if($endpos2 !== false)
-			$endpos = max($endpos, $endpos2);
+			$endpos = min($endpos, $endpos2);
 
 		$length = $endpos - $startpos;
 
@@ -109,7 +110,7 @@ function prepare_png($pn, $num, $f)
 
 function getWikitextPayloadLines($pagetitle)
 {
-	$wikitext = explode("\n", file_get_contents('http://de.guttenplag.wikia.com/index.php?action=raw&templates=expand&title='.urlencode($pagetitle)));
+	$wikitext = explode("\n", WikiLoader::getRawTextByTitle($pagetitle));
 	$result = array();
 	foreach($wikitext as $line) {
 		# remove comment lines
