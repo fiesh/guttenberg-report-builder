@@ -21,25 +21,17 @@ class FragmentLoader {
 		}
 	}
 
-	static private function getFragmentsWithPrefix($prefix)
+	static public function getFragments()
 	{
-		$entries = WikiLoader::getEntriesWithPrefix($prefix, true, true);
+		$titleBlacklist = array('Fragment 99999 11-22');
+		$entries = WikiLoader::getEntriesWithPrefix('Fragment', true, true);
 		$fragments = array();
 		foreach($entries as $e) {
 			$a = self::processString($e['revisions'][0]['*']);
 			$a['wikiTitle'] = $e['title'];
-			if(isset($a[1]) && $a[1])
+			if(isset($a[1]) && $a[1] && !in_array($e['title'], $titleBlacklist))
 				$fragments[] = $a;
 		}
-		return $fragments;
-	}
-
-	static public function getFragments()
-	{
-		$fragments = array();
-		for($i = 0; $i < 5; $i++)
-			$fragments = array_merge($fragments, self::getFragmentsWithPrefix("Fragment $i"));
-
 		return $fragments;
 	}
 }

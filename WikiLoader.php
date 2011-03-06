@@ -5,19 +5,43 @@ class WikiLoader {
 	const REDIRECT_PATTERN = '/^#(REDIRECT|WEITERLEITUNG)\s+/';
 
 	// Returns a list of pages with a given prefix in unserialized format.
-	static private function queryPrefixList($prefix)
+	// Gracefully resumes the API query if the result limit is exceeded.
+	static private function queryPrefixList($prefix,
+		$ignoreRedirects = false)
 	{
-		return unserialize(file_get_contents(self::API.'?action=query&prop=revisions&&format=php&generator=allpages&gaplimit=500&gapprefix='.urlencode($prefix)));
+		$url = self::API.'?action=query&prop=&format=php&generator=allpages&gaplimit=500&gapprefix='.urlencode($prefix);
+		if ($ignoreRedirects)
+			$url .= '&gapfilterredir=nonredirects';
+
+		$s = unserialize(file_get_contents($url));
+
+		while(isset($s['query-continue'])) {
+			$url2 = $url.'&gapfrom='.urlencode($s['query-continue']['allpages']['gapfrom']);
+			unset($s['query-continue']);
+			$s = array_merge_recursive($s, unserialize(file_get_contents($url2)));
+		}
+
+		return $s;
 	}
 
 	// Returns a list of category members in unserialized format.
+	// Gracefully resumes the API query if the result limit is exceeded.
 	static private function queryCategoryMembers($category)
 	{
-		return unserialize(file_get_contents(self::API.'?action=query&list=categorymembers&cmtitle='.urlencode($category).'&format=php&cmlimit=500'));
+		$url = self::API.'?action=query&list=categorymembers&cmtitle='.urlencode($category).'&format=php&cmlimit=500';
+		$s = unserialize(file_get_contents($url));
+
+		while(isset($s['query-continue'])) {
+			$url2 = $url.'&cmcontinue='.urlencode($s['query-continue']['categorymembers']['cmcontinue']);
+			unset($s['query-continue']);
+			$s = array_merge_recursive($s, unserialize(file_get_contents($url2)));
+		}
+
+		return $s;
 	}
 
 	// Returns page data (given a list of page IDs) in unserialized format.
-	static private function queryEntries($pageids)
+	static public function queryEntries($pageids)
 	{
 		return unserialize(file_get_contents(self::API.'?action=query&prop=revisions&rvprop=content&format=php&pageids='.urlencode(implode('|', $pageids))));
 	}
@@ -30,7 +54,7 @@ class WikiLoader {
 
 
 	// Returns a list of page IDs of pages with a given prefix.
-	static public function getPrefixList($prefix)
+	static public function getPrefixList($prefix, $ignoreRedirects = false)
 	{
 		$s = self::queryPrefixList($prefix);
 		$pageids = array();
@@ -80,7 +104,7 @@ class WikiLoader {
 		$ignoreRedirects = false, $sortByTitle = true)
 	{
 		$entries = array();
-		foreach(array_chunk($pageids, 49) as $chunk) {
+		foreach(array_chunk($pageids, 50) as $chunk) {
 			$response = self::queryEntries($chunk);
 			if(isset($response['query']['pages']))
 				$entries = array_merge($entries, $response['query']['pages']);
@@ -96,10 +120,7 @@ class WikiLoader {
 		}
 
 		if($sortByTitle) {
-			$temp = array(); // will contain all wiki titles
-			foreach($entries as $e)
-				$temp[] = $e['title'];
-			array_multisort($temp, $entries); // sort by wiki title
+			usort($entries, 'wikiLoaderTitleCmp');
 		}
 
 		return $entries;
@@ -112,7 +133,13 @@ class WikiLoader {
 	static public function getEntriesWithPrefix($prefix,
 		$ignoreRedirects = false, $sortByTitle = true)
 	{
-		$pageids = self::getPrefixList($prefix);
+		$pageids = self::getPrefixList($prefix, $ignoreRedirects);
 		return self::getEntries($pageids, $ignoreRedirects, $sortByTitle);
 	}
 }
+
+// this function is outside of the class as it's used as a usort callback
+function wikiLoaderTitleCmp($entry1, $entry2) {
+	return strnatcasecmp($entry1['title'], $entry2['title']);
+}
+
