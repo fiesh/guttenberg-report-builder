@@ -9,15 +9,17 @@ function insert_orig($pn, $f, $num)
 {
     $tooltip =  'Quelle: '.str_replace('"','',$f['src']);
     if (isset($f['anmerkung']) && !empty($f['anmerkung']))
-        {
-            $tooltip .=  '    Anmerkung: '.str_replace('"','',$f['anmerkung']);
-        }
+        $tooltip .=  '    Anmerkung: '.str_replace('"','',$f['anmerkung']);
+
+    $class = 'orig';
+    if ($f['lines'] > 100)
+        $class .= ' origfootnote';
 
     $orig = $f['orig'];
     return
     '				<div
               id="orig'.$pn.'_'.$num.'"
-              class="orig"
+              class="'.$class.'"
               title="'.$tooltip.'"
               >'.$orig.'</div>'."\n";
 }
