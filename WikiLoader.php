@@ -2,7 +2,7 @@
 
 class WikiLoader {
 	const API = 'http://de.guttenplag.wikia.com/api.php';
-	const REDIRECT_PATTERN = '/^#(REDIRECT|WEITERLEITUNG)\s+/';
+	const PAGES_PER_QUERY = 50;
 
 	// Returns a list of pages with a given prefix in unserialized format.
 	// Gracefully resumes the API query if the result limit is exceeded.
@@ -43,7 +43,7 @@ class WikiLoader {
 	// Returns page data (given a list of page IDs) in unserialized format.
 	static public function queryEntries($pageids)
 	{
-		return unserialize(file_get_contents(self::API.'?action=query&prop=revisions&rvprop=content&format=php&pageids='.urlencode(implode('|', $pageids))));
+		return unserialize(file_get_contents(self::API.'?action=query&prop=info%7Crevisions%7Ccategories&rvprop=content&cllimit=max&format=php&pageids='.urlencode(implode('|', $pageids))));
 	}
 
 	// Returns page data (given a page title) in unserialized format.
@@ -104,19 +104,16 @@ class WikiLoader {
 		$ignoreRedirects = false, $sortByTitle = true)
 	{
 		$entries = array();
-		foreach(array_chunk($pageids, 50) as $chunk) {
+		foreach(array_chunk($pageids, self::PAGES_PER_QUERY) as $chunk) {
 			$response = self::queryEntries($chunk);
+			if(isset($response['query-continue']['categories']))
+				error_log("Not all categories have been returned, reduce PAGES_PER_QUERY!");
 			if(isset($response['query']['pages']))
 				$entries = array_merge($entries, $response['query']['pages']);
 		}
 
 		if($ignoreRedirects) {
-			$temp = array(); // will contain all non-redirects
-			foreach($entries as $e) {
-				if(!preg_match(self::REDIRECT_PATTERN, $e['revisions'][0]['*']))
-					$temp[] = $e;
-			}
-			$entries = $temp;
+			$entries = array_filter($entries, 'wikiLoaderIsNonRedirect');
 		}
 
 		if($sortByTitle) {
@@ -134,12 +131,15 @@ class WikiLoader {
 		$ignoreRedirects = false, $sortByTitle = true)
 	{
 		$pageids = self::getPrefixList($prefix, $ignoreRedirects);
-		return self::getEntries($pageids, $ignoreRedirects, $sortByTitle);
+		return self::getEntries($pageids, false, $sortByTitle);
 	}
 }
 
-// this function is outside of the class as it's used as a usort callback
+// these functions have to be defined outside of the class --
+// they are used as callbacks
+function wikiLoaderIsNonRedirect($entry) {
+	return !isset($entry['redirect']);
+}
 function wikiLoaderTitleCmp($entry1, $entry2) {
 	return strnatcasecmp($entry1['title'], $entry2['title']);
 }
-

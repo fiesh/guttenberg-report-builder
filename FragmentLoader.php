@@ -21,6 +21,17 @@ class FragmentLoader {
 		}
 	}
 
+	static private function collectCategories($entry)
+	{
+		$cats = array();
+		if(isset($entry['categories']))
+			foreach($entry['categories'] as $c)
+				$cats[] = $c['title'];
+		$cats = array_unique($cats);
+		sort($cats);
+		return $cats;
+	}
+
 	static public function getFragments()
 	{
 		$titleBlacklist = array('Fragment 99999 11-22');
@@ -29,6 +40,7 @@ class FragmentLoader {
 		foreach($entries as $e) {
 			$a = self::processString($e['revisions'][0]['*']);
 			$a['wikiTitle'] = $e['title'];
+			$a['categories'] = self::collectCategories($e);
 			if(isset($a[1]) && $a[1] && !in_array($e['title'], $titleBlacklist))
 				$fragments[] = $a;
 		}
