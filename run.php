@@ -1,5 +1,7 @@
 <?php
 
+chdir(dirname(__FILE__));
+
 define('ZEILEN_LAENGE', 16.6);
 define('FUSSNOTEN_LAENGE', 14.4);
 define('ZUSATZ_OBEN', 2);
