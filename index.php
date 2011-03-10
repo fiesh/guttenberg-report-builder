@@ -65,8 +65,8 @@ for ($p=1; $p<=475; $p++) {
 		$c++;
 	}
 
-	$words = $pageInfo[$p][4];
-	$sentences = $pageInfo[$p][3];
+	$words = trim($pageInfo[$p][4]);
+	$sentences = trim($pageInfo[$p][3]);
 	if ($p >= 408) $class = "appendix";
 	else if ($p < 6) $class = "title";
 	else if ($sentences > 100) $class = "index";
