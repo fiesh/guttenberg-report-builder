@@ -52,7 +52,7 @@ $chapters = array(
 	408 => array('Anhänge, Literaturverzeichnis, Sachwortverzeichnis', 1),
 );
 
-	
+
 $pageInfo = CSVUtil::read("pages.csv");
 
 $c = 0;
@@ -68,6 +68,7 @@ for ($p=1; $p<=475; $p++) {
 	$words = trim($pageInfo[$p][4]);
 	$sentences = trim($pageInfo[$p][3]);
 	if ($p >= 408) $class = "appendix";
+	else if ($p == 14) $class = "emptypage";
 	else if ($p < 6) $class = "title";
 	else if ($sentences > 100) $class = "index";
 	else if ($words < 100) $class = "100";
