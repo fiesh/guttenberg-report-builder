@@ -156,14 +156,14 @@ foreach(FragmentLoader::getFragments() as $f) {
 			$fr[$i]['lines'] = $f[2];
 			$fr[$i]['startpos'] = $extents['startpos'];
 			$fr[$i]['length'] = $extents['length'];
+			$fr[$i]['seitefund'] = $f[4];
+			$fr[$i]['zeilenfund'] = $f[5];
 			$fr[$i]['orig'] = $f[6];
 			$fr[$i]['category'] = $f[7];
 			$fr[$i]['inLit'] = $f[8];
 			$fr[$i]['src'] = $f[9];
 			$fr[$i]['url'] = $f[10];
 			$fr[$i]['anmerkung'] = $f[11];
-			$fr[$i]['seitefund'] = $f[4];
-			$fr[$i]['zeilenfund'] = $f[5];
 			$i++;
 		}
 	}

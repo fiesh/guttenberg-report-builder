@@ -24,8 +24,6 @@ Die farblich gekennzeichneten Seiten enthalten nicht ausgewiesene Zitate oder Pl
 <p><small>(Die farbliche Hervorhebung unten basiert auf den Daten der im Wiki gesammelten Seiten.  Diese sind noch nicht vollständig in das neue „Fragmente“-Format übertragen, so dass auf manchen rot hinterlegten Seiten die graphische Darstellung von Plagiaten fehlen kann.)</small></p>
 
 <p><big>Der interaktive Guttenberg Report darf als ausgelagerter Teil des Wikis verstanden werden.  Sämtliche Inhalte dürfen daher unter Quellenangabe zu Pressezwecken verwendet werden.</big></p>
-
-<p>Nicht alle Seiten werden korrekt dargestellt.  Falls ihr mithelfen wollt, dies zu korrigieren, so findet ihr <a href="http://de.guttenplag.wikia.com/wiki/WieKannIchHelfen">hier</a> weitere Informationen.</p>
 <?php
 
 chdir(dirname(__FILE__));
@@ -67,14 +65,15 @@ for ($p=1; $p<=475; $p++) {
 
 	$words = trim($pageInfo[$p][4]);
 	$sentences = trim($pageInfo[$p][3]);
-	if ($p >= 408) $class = "appendix";
+	if ($p <= 4) $class = sprintf("%03d", $p);
+	else if ($p <= 6) $class = "500";
+	else if ($p <= 13) $class = "contents";
 	else if ($p == 14) $class = "emptypage";
-	else if ($p < 6) $class = "title";
-	else if ($sentences > 100) $class = "index";
-	else if ($words < 100) $class = "100";
-	else if ($words < 200) $class = "200";
-	else if ($words < 300) $class = "300";
-	else if ($words < 400) $class = "400";
+	else if ($p >= 408) $class = "appendix";
+	else if ($words < 150) $class = "100";
+	else if ($words < 250) $class = "200";
+	else if ($words < 350) $class = "300";
+	else if ($words < 450) $class = "400";
 	else $class = "500";
 	
 	if (in_array($p, $plag_pages)) {
@@ -84,9 +83,6 @@ for ($p=1; $p<=475; $p++) {
 		print '<div class="page">';
 		print '<a href="'.sprintf("%03d",$p).'.html"><img src="'.$class.'.png" alt="S. '.$p.', Sätze: '.$sentences.',  Wörter: '.$words.'" title="Seite '.$p.'" /></a></div>';
 	}
-	
-	
-	//if ($p > 1 && $p%10 == 0) print '</div>';
 }
 
 ?></div><br style="clear:both" /></div>

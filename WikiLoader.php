@@ -46,10 +46,10 @@ class WikiLoader {
 		return unserialize(file_get_contents(self::API.'?action=query&prop=info%7Crevisions%7Ccategories&rvprop=content&cllimit=max&format=php&pageids='.urlencode(implode('|', $pageids))));
 	}
 
-	// Returns page data (given a page title) in unserialized format.
-	static private function queryEntryByTitle($title)
+	// Returns page data (given page titles) in unserialized format.
+	static private function queryEntriesByTitles($titles)
 	{
-		return unserialize(file_get_contents(self::API.'?action=query&prop=revisions&rvprop=content&format=php&titles='.urlencode($title)));
+		return unserialize(file_get_contents(self::API.'?action=query&prop=info%7Crevisions%7Ccategories&rvprop=content&cllimit=max&format=php&titles='.urlencode(implode('|', $titles))));
 	}
 
 
@@ -75,6 +75,17 @@ class WikiLoader {
 		return $pageids;
 	}
 
+	// Returns a list of page titles of category members.
+	static public function getCategoryMembersTitles($category)
+	{
+		$s = self::queryCategoryMembers($category);
+		$titles = array();
+		foreach($s['query']['categorymembers'] as $member) {
+			$titles[] = $member['title'];
+		}
+		return $titles;
+	}
+
 	// Returns page data for a single page ID, in unserialized format.
 	static public function getEntry($pageid)
 	{
@@ -91,7 +102,7 @@ class WikiLoader {
 	// Returns raw Wikitext for a single page, given the page title.
 	static public function getRawTextByTitle($title)
 	{
-		$s = self::queryEntryByTitle($title);
+		$s = self::queryEntriesByTitles(array($title));
 		foreach ($s['query']['pages'] as $page)
 			return $page['revisions'][0]['*'];
 		return false;
@@ -106,6 +117,32 @@ class WikiLoader {
 		$entries = array();
 		foreach(array_chunk($pageids, self::PAGES_PER_QUERY) as $chunk) {
 			$response = self::queryEntries($chunk);
+			if(isset($response['query-continue']['categories']))
+				error_log("Not all categories have been returned, reduce PAGES_PER_QUERY!");
+			if(isset($response['query']['pages']))
+				$entries = array_merge($entries, $response['query']['pages']);
+		}
+
+		if($ignoreRedirects) {
+			$entries = array_filter($entries, 'wikiLoaderIsNonRedirect');
+		}
+
+		if($sortByTitle) {
+			usort($entries, 'wikiLoaderTitleCmp');
+		}
+
+		return $entries;
+	}
+
+	// Returns page data for multiple page titles, in unserialized format.
+	// Optionally cleans up the returned data (removing results from
+	// pages that are redirects; sorting results by page title).
+	static public function getEntriesByTitles($titles,
+		$ignoreRedirects = false, $sortByTitle = true)
+	{
+		$entries = array();
+		foreach(array_chunk($titles, self::PAGES_PER_QUERY) as $chunk) {
+			$response = self::queryEntriesByTitles($chunk);
 			if(isset($response['query-continue']['categories']))
 				error_log("Not all categories have been returned, reduce PAGES_PER_QUERY!");
 			if(isset($response['query']['pages']))
