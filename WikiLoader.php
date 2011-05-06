@@ -43,13 +43,31 @@ class WikiLoader {
 	// Returns page data (given a list of page IDs) in unserialized format.
 	static public function queryEntries($pageids)
 	{
-		return unserialize(file_get_contents(self::API.'?action=query&prop=info%7Crevisions%7Ccategories&rvprop=content&cllimit=max&format=php&pageids='.urlencode(implode('|', $pageids))));
+		$url = self::API.'?action=query&prop=info%7Crevisions%7Ccategories&rvprop=content&cllimit=max&format=php&pageids='.urlencode(implode('|', $pageids));
+		$s = unserialize(file_get_contents($url));
+
+		while(isset($s['query-continue'])) {
+			$url2 = $url.'&clcontinue='.urlencode($s['query-continue']['categories']['clcontinue']);
+			unset($s['query-continue']);
+			$s = array_merge_recursive($s, unserialize(file_get_contents($url2)));
+		}
+
+		return $s;
 	}
 
 	// Returns page data (given page titles) in unserialized format.
 	static private function queryEntriesByTitles($titles)
 	{
-		return unserialize(file_get_contents(self::API.'?action=query&prop=info%7Crevisions%7Ccategories&rvprop=content&cllimit=max&format=php&titles='.urlencode(implode('|', $titles))));
+		$url = self::API.'?action=query&prop=info%7Crevisions%7Ccategories&rvprop=content&cllimit=max&format=php&titles='.urlencode(implode('|', $titles));
+		$s = unserialize(file_get_contents($url));
+
+		while(isset($s['query-continue'])) {
+			$url2 = $url.'&clcontinue='.urlencode($s['query-continue']['categories']['clcontinue']);
+			unset($s['query-continue']);
+			$s = array_merge_recursive($s, unserialize(file_get_contents($url2)));
+		}
+
+		return $s;
 	}
 
 
@@ -117,8 +135,6 @@ class WikiLoader {
 		$entries = array();
 		foreach(array_chunk($pageids, self::PAGES_PER_QUERY) as $chunk) {
 			$response = self::queryEntries($chunk);
-			if(isset($response['query-continue']['categories']))
-				error_log("Not all categories have been returned, reduce PAGES_PER_QUERY!");
 			if(isset($response['query']['pages']))
 				$entries = array_merge($entries, $response['query']['pages']);
 		}
@@ -143,8 +159,6 @@ class WikiLoader {
 		$entries = array();
 		foreach(array_chunk($titles, self::PAGES_PER_QUERY) as $chunk) {
 			$response = self::queryEntriesByTitles($chunk);
-			if(isset($response['query-continue']['categories']))
-				error_log("Not all categories have been returned, reduce PAGES_PER_QUERY!");
 			if(isset($response['query']['pages']))
 				$entries = array_merge($entries, $response['query']['pages']);
 		}

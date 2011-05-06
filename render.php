@@ -1,15 +1,15 @@
 <?php
 
-function insert_plag($pn, $num)
+function insert_plag($pn, $num, $f, $source)
 {
     return '				<div id="plag'.$pn.'_'.$num.'" class="plag"><img src="plagiate/'.$pn.'_'.$num.'.png" /></div>'."\n";
 }
 
-function insert_orig($pn, $f, $num)
+function insert_orig($pn, $num, $f, $source)
 {
-    $tooltip =  'Quelle: '.str_replace('"','',$f['src']);
-    if (isset($f['anmerkung']) && !empty($f['anmerkung']))
-        $tooltip .=  '    Anmerkung: '.str_replace('"','',$f['anmerkung']);
+    $tooltip =  'Quelle: '.preg_replace('/<\/?em>/', '', $source['rendered']);
+    if (isset($f['note']) && !empty($f['note']))
+        $tooltip .=  '    Anmerkung: '.str_replace('"','',$f['note']);
 
     $class = 'orig';
     if ($f['lines'] > 100)
@@ -25,27 +25,32 @@ function insert_orig($pn, $f, $num)
 }
 
 
-function insert_script($pn, $num, $f)
+function insert_script($pn, $num, $f, $source)
 {
-    $quelle =  str_replace('"','',$f['src']);
-    if($f['inLit'] === 'ja')
+    $quelle = $source['rendered'];
+
+    if($source['InLit'] === 'ja')
 	    $lit = '<img src="accept.png" title="Quelle in Literaturverzeichnis vorhanden." />';
+    else if($source['InFN'] === 'ja') //TODO
+	    $lit = '<img src="infn.png" title="Quelle NUR in Fußnoten vorhanden." />';
     else
 	    $lit = '<img src="error.png" title="Quelle NICHT in Literaturverzeichnis vorhanden!" />';
-    if(isset($f['zeilenfund']) && $f['zeilenfund'])
-        $foundat = 'Seite '.$f['seitefund'].', Zeilen '.$f['zeilenfund'];
+
+    if(isset($f['origlines']) && $f['origlines'])
+        $foundat = 'Seite '.$f['origpage'].', Zeilen '.$f['origlines'];
     else
-        $foundat = 'Seite '.$f['seitefund'];
-    if(isset($f['url'])) {
-        $source = '<div class="src"><a href="'.$f['url'].'">'.$quelle.'</a> auf '.$foundat.'.</div><div class="inlit">'.$lit.'</div>';
+        $foundat = 'Seite '.$f['origpage'];
+
+    if(isset($source['URL'])) {
+        $xsource = '<div class="src"><a href="'.$source['URL'].'">'.$quelle.'</a> auf '.$foundat.'.</div><div class="inlit">'.$lit.'</div>';
     } else {
-        $source = '<div class="src">'.$quelle.' auf '.$foundat.'.</div><div class="inlit">'.$lit.'</div>';
+        $xsource = '<div class="src">'.$quelle.' auf '.$foundat.'.</div><div class="inlit">'.$lit.'</div>';
     }
 
     return '		$(\'#plag'.$pn.'_'.$num.'\').hover(
         function () {
         $(\'#infoblock-cat\').replaceWith(\'<div class="category" id="infoblock-cat"><a href="http://de.guttenplag.wikia.com/wiki/PlagiatsKategorien">'.$f['category'].'</a></div>\');
-        $(\'#infoblock-src\').replaceWith(\'<div class="src" id="infoblock-src">'.$source.'</div>\');
+        $(\'#infoblock-src\').replaceWith(\'<div class="src" id="infoblock-src">'.$xsource.'</div>\');
             deselect(activeOrig);
             activeOrig = $(\'#orig'.$pn.'_'.$num.'\');
             select(activeOrig);
@@ -55,23 +60,23 @@ function insert_script($pn, $num, $f)
     );';
 }
 
-function insert_css($pn, $num, $fragment)
+function insert_css($pn, $num, $f)
 {
     return '		#plag'.$pn.'_'.$num.' {
             z-index: 5;
-            height: '.$fragment['length'].'px;
+            height: '.$f['length'].'px;
             position: absolute;
-            top: '.($fragment['startpos']+8).'px;
+            top: '.($f['startpos']+8).'px;
         }
         #orig'.$pn.'_'.$num.' {
             z-index: 5;
-            top: '.($fragment['startpos']-3).'px;
-            min-height: '.$fragment['origlength'].'px;
+            top: '.($f['startpos']-3).'px;
+            min-height: '.$f['origlength'].'px;
             position: absolute;
         }'."\n";
 }
 
-function printout($fragments, $page)
+function printout($fragments, $sources, $page)
 {
     $ret ='<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
@@ -110,7 +115,7 @@ function printout($fragments, $page)
 ';
     $i = 0;
     if(isset($fragments)) foreach($fragments as $f) {
-        $ret .= insert_plag($page, $i++);
+        $ret .= insert_plag($page, $i++, $f, $sources[$f['src']]);
     }
     $ret .= '			</div>
         </div>
@@ -119,7 +124,7 @@ function printout($fragments, $page)
           <div class="src" id="infoblock-src"></div>';
     $i = 0;
     if(isset($fragments)) foreach($fragments as $f) {
-        $ret .= insert_orig($page, $f, $i++);
+        $ret .= insert_orig($page, $i++, $f, $sources[$f['src']]);
     }
     $ret .='
         </div>
@@ -137,7 +142,7 @@ function printout($fragments, $page)
 
     $i = 0;
     if(isset($fragments)) foreach($fragments as $f) {
-        $ret .= insert_script($page, $i++, $f);
+        $ret .= insert_script($page, $i++, $f, $sources[$f['src']]);
     }
 
     $ret .= '
@@ -157,7 +162,7 @@ function printout($fragments, $page)
 ';
     $i = 0;
     if(isset($fragments)) foreach($fragments as $f) {
-        $ret .= insert_css($page, $i++, $f);
+        $ret .= insert_css($page, $i++, $f, $sources[$f['src']]);
     }
 
     $ret .= '	</style>

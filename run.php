@@ -10,11 +10,11 @@ define('HOEHE', 910);
 
 define('PATH', 'web');
 
-$whitelist = array('KomplettPlagiat', 'Verschleierung', 'HalbsatzFlickerei', 'ShakeAndPaste', 'ÜbersetzungsPlagiat', 'StrukturPlagiat', 'BauernOpfer', 'VerschärftesBauernOpfer');
-
+require_once('BibliographyLoader.php');
 require_once('FragmentLoader.php');
 require_once('WikiLoader.php');
 require_once('render.php');
+require_once('rendersources.php');
 
 function calcPosition($linenumber, $linepositionsEntry, $offset)
 {
@@ -103,6 +103,21 @@ function calcExtents($fp, $fl, $linepositions)
 	}
 }
 
+function makeAssociative($a)
+{
+	$result = array();
+	foreach ($a as $b) {
+		$result[$b['title']] = $b;
+	}
+	return $result;
+}
+
+function getIntersection($arr1, $arr2)
+{
+	$intersect = array_values(array_intersect($arr1, $arr2));
+	return empty($intersect) ? false : $intersect[0];
+}
+
 function prepare_png($pn, $num, $f)
 {
 	$cmd = 'convert images/'.$pn.'.png -crop 600x'.$f['length'].'+0+'.$f['startpos'].' -quality 100 -define png:bit-depth=8 '.PATH.'/plagiate/'.$pn.'_'.$num.'.png';
@@ -142,31 +157,41 @@ function createLinePositionTable()
 
 system('mkdir -p '.PATH.'/plagiate');
 
+$fragmenttypes = makeAssociative(FragmentLoader::getFragmentTypes());
+$sources = makeAssociative(BibliographyLoader::getSources());
 $linepositions = createLinePositionTable();
 
 // Lade Fragmente aus Wiki, Vorverarbeitung und Berechnung der Fragmentposition
-$i = 0;
-foreach(FragmentLoader::getFragments() as $f) {
-	if(!in_array($f[7], $whitelist)) {
-		print "Fragment $f[1] $f[2]: Ignoriere, Plagiatstyp '$f[7]'\n";
-	} else {
-		$extents = calcExtents($f[1], $f[2], $linepositions);
-		if ($extents) {
-			$fr[$i]['pagenumber'] = $f[1];
-			$fr[$i]['lines'] = $f[2];
-			$fr[$i]['startpos'] = $extents['startpos'];
-			$fr[$i]['length'] = $extents['length'];
-			$fr[$i]['seitefund'] = $f[4];
-			$fr[$i]['zeilenfund'] = $f[5];
-			$fr[$i]['orig'] = $f[6];
-			$fr[$i]['category'] = $f[7];
-			$fr[$i]['inLit'] = $f[8];
-			$fr[$i]['src'] = $f[9];
-			$fr[$i]['url'] = $f[10];
-			$fr[$i]['anmerkung'] = $f[11];
-			$i++;
+$fr = array();
+foreach(FragmentLoader::getFragmentsG2006() as $fragdata) {
+	$title = $fragdata['wikiTitle'];
+	$extents = calcExtents($fragdata[1], $fragdata[2], $linepositions);
+	if($extents) {
+		$f['page'] = $fragdata[1];
+		$f['lines'] = $fragdata[2];
+		$f['startpos'] = $extents['startpos'];
+		$f['length'] = $extents['length'];
+		$f['origpage'] = $fragdata[4];
+		$f['origlines'] = $fragdata[5];
+		$f['orig'] = $fragdata[6];
+		$f['category'] = getIntersection(array_keys($fragmenttypes), $fragdata['categories']);
+		$f['inLit'] = $fragdata[8];
+		$f['src'] = getIntersection(array_keys($sources), $fragdata['categories']);
+		$f['url'] = $fragdata[10];
+		$f['note'] = $fragdata[11];
+		if($f['category'] === false) {
+			print "$title: keine Plagiatskategorie gefunden!\n";
+		} else if($f['src'] === false) {
+			print "$title: keine Quelle gefunden!\n";
+		} else {
+			$fr[] = $f;
 		}
 	}
+}
+
+// Verarbeitung der Quellen
+foreach($sources as $title => $source) {
+	$sources[$title]['rendered'] = renderSource($source);
 }
 
 // Berechne minimale Hoehe der Originaltext-divs
@@ -174,8 +199,8 @@ foreach(FragmentLoader::getFragments() as $f) {
 for($i = 0; $i < count($fr); ++$i) {
 	$origlength = $fr[$i]['length'];
 	for($j = 0; $j < count($fr); ++$j) {
-		if($fr[$j]['pagenumber'] == $fr[$i]['pagenumber']
-		    && $fr[$j]['startpos'] > $fr[$i]['startpos']) {
+		if($fr[$j]['page'] == $fr[$i]['page'] &&
+		   $fr[$j]['startpos'] > $fr[$i]['startpos']) {
 			$origlength = min($origlength,
 				$fr[$j]['startpos'] - $fr[$i]['startpos']);
 		}
@@ -185,16 +210,16 @@ for($i = 0; $i < count($fr); ++$i) {
 
 // Gib ein HTML-Dokument pro Dissertationsseite aus, mit Fragmenten
 for($page = 1; $page <= 475; $page++) {
-	$fragments = array();
+	$pagefrags = array();
 	$page = sprintf('%03d', $page);
 	$i = 0;
 	foreach($fr as $f)
-		if($f['pagenumber'] == $page) {
+		if($f['page'] == $page) {
 			prepare_png($page, $i++, $f);
-			$fragments[] = $f;
+			$pagefrags[] = $f;
 		}
 
-	$output = printout($fragments, $page);
+	$output = printout($pagefrags, $sources, $page);
 	$file = fopen(PATH."/$page.html", 'w'); 
 	fwrite($file, $output);
 	fclose($file);

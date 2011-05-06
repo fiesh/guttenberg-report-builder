@@ -13,7 +13,7 @@ class BibliographyLoader {
 			$source = array();
 			while(isset($matches[1][$i])) {
 				if($matches[1][$i]) {
-					$source[$matches[1][$i]] = trim($matches[2][$i]);
+					$source[$matches[1][$i]] = trim(html_entity_decode($matches[2][$i], ENT_QUOTES, 'UTF-8'));
 				}
 				$i++;
 			}
