@@ -1,12 +1,9 @@
 all: report csv
 
-report: run web/index.html gzips
+report: run gzips
 
 run::
 	@php run.php
-
-web/index.html: index.php
-	@php index.php > web/index.html
 
 gzips::
 	@./create_gzips.sh

@@ -7,6 +7,8 @@ define('FUSSNOTEN_LAENGE', 14.4);
 define('ZUSATZ_OBEN', 2);
 define('ZUSATZ_UNTEN', 0);
 define('HOEHE', 910);
+define('MIN_PAGE', 1);
+define('MAX_PAGE', 475);
 
 define('PATH', 'web');
 
@@ -14,6 +16,7 @@ require_once('BibliographyLoader.php');
 require_once('FragmentLoader.php');
 require_once('WikiLoader.php');
 require_once('render.php');
+require_once('renderindex.php');
 require_once('rendersources.php');
 
 function calcPosition($linenumber, $linepositionsEntry, $offset)
@@ -208,20 +211,44 @@ for($i = 0; $i < count($fr); ++$i) {
 	$fr[$i]['origlength'] = $origlength;
 }
 
-// Gib ein HTML-Dokument pro Dissertationsseite aus, mit Fragmenten
+// teile Plagiate nach Dissertationsseiten auf
+$pagefrags = array();
 for($page = 1; $page <= 475; $page++) {
-	$pagefrags = array();
-	$page = sprintf('%03d', $page);
-	$i = 0;
-	foreach($fr as $f)
-		if($f['page'] == $page) {
-			prepare_png($page, $i++, $f);
-			$pagefrags[] = $f;
-		}
+	$pagefrags[$page] = array();
+}
+foreach($fr as $f) {
+	$page = (int) $f['page'];
+	if($page >= MIN_PAGE && $page <= MAX_PAGE) {
+		$pagefrags[$page][] = $f;
+	} else {
+		print "$title: fehlerhaftes Feld 'Seiten Dissertation'!\n";
+	}
+}
 
-	$output = printout($pagefrags, $sources, $page);
-	$file = fopen(PATH."/$page.html", 'w'); 
+// Gib ein HTML-Dokument pro Dissertationsseite aus, mit Fragmenten
+for($page = MIN_PAGE; $page <= MAX_PAGE; $page++) {
+	$pn = sprintf('%03d', $page);
+	foreach($pagefrags[$page] as $f) {
+		prepare_png($pn, $i++, $f);
+	}
+
+	$output = printout($pagefrags[$page], $sources, $pn);
+	$file = fopen(PATH."/$pn.html", 'w'); 
 	fwrite($file, $output);
 	fclose($file);
 }
 
+// Gib index.html aus
+$plagsPerPage = array();
+for($page = MIN_PAGE; $page <= MAX_PAGE; $page++) {
+	$pagesources = array();
+	foreach($pagefrags[$page] as $f) {
+		if (!in_array($f['src'], $pagesources))
+			$pagesources[] = $f['src'];
+	}
+	$plagsPerPage[$page] = count($pagesources);
+}
+$output = printout_index($plagsPerPage);
+$file = fopen(PATH."/index.html", 'w'); 
+fwrite($file, $output);
+fclose($file);
