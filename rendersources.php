@@ -10,6 +10,15 @@ class SourceRenderer
 	private $buffer;
 	private $state;
 	private $wikiLinkDone;
+	private $plain;
+
+	// surrounds text with <em></em> unless in plain mode
+	private function emphasize($s) {
+		if ($this->plain)
+			return $s;
+		else
+			return '<em>'.$s.'</em>';
+	}
 
 	// this function tries to emulate bibtex's single-name parsing
 	// note: only the "First von Last" form is supported at this moment
@@ -165,7 +174,7 @@ class SourceRenderer
 	private function renderBtitle($source)
 	{
 		if(isset($source['Titel'])) {
-			return '<em>'.$source['Titel'].'</em>';
+			return $this->emphasize($source['Titel']);
 		} else {
 			return '';
 		}
@@ -179,7 +188,7 @@ class SourceRenderer
 		} else {
 			if(isset($source['Reihe'])) {
 				if(isset($source['Jahrgang'])) {
-					$s .= '<em>' . $source['Reihe'] . '</em>. ';
+					$s .= $this->emphasize($source['Reihe']) . '. ';
 					$s .= 'Bd. ' . $source['Jahrgang'] . ': ';
 				}
 				$s .= $this->renderBtitle($source);
@@ -201,7 +210,7 @@ class SourceRenderer
 			$editorsInvolved = $this->renderEditorsInvolved($source);
 			if($editorsInvolved)
 				$s .= $editorsInvolved . ': ';
-			$s .= '<em>' . $source['Sammlung'] . '</em>';
+			$s .= $this->emphasize($source['Sammlung']);
 			if(isset($source['Jahrgang'])) {
 				$s .= ' Bd.&nbsp;' . $source['Jahrgang'];
 			}
@@ -223,7 +232,11 @@ class SourceRenderer
 		if(isset($source['URL'])) {
 			$urlfield = $this->korrUrlForBibliography($source['URL']);
 			$urlparts = explode(' ', $urlfield, 2);
-			$result = '<a href="'.trim($urlparts[0]).'">URL</a>';
+			if ($this->plain) {
+				$result = $urlparts[0];
+			} else {
+				$result = '<a href="'.trim($urlparts[0]).'">URL</a>';
+			}
 			if(isset($urlparts[1])) {
 				$result .= ' ' . trim($urlparts[1]);
 			}
@@ -294,7 +307,7 @@ class SourceRenderer
 			$s .= $source['Verlag'];
 		}
 		if(!$s && isset($source['URL'])) {
-			$s .= $this->renderURL($source);
+			$s .= $this->renderUrl($source);
 		}
 		$date = $this->renderDate($source);
 		if($date) {
@@ -332,12 +345,13 @@ class SourceRenderer
 		return preg_replace('/^\[('.$schemeRegex.'[^][{}<>"\\x00-\x20\\x7F]+) *([^\]\\x00-\\x08\\x0A-\\x1F]*)?\]$/s', '$1', $s);
 	}
 
-	private function bibitemStart()
+	private function bibitemStart($plain)
 	{
 		$this->out = '';
 		$this->buffer = '';
 		$this->state = 'before.all';
 		$this->wikiLinkDone = false;
+		$this->plain = $plain;
 	}
 
 	private function bibitemEnd()
@@ -378,7 +392,7 @@ class SourceRenderer
 
 	private function outputWikiLink($source)
 	{
-		if($this->buffer && !$this->wikiLinkDone) {
+		if($this->buffer && !$this->wikiLinkDone && !$this->plain) {
 			$this->buffer =
 				'<a href="http://de.guttenplag.wikia.com/wiki/'
 				. str_replace(' ', '_', $source['title'])
@@ -413,24 +427,24 @@ class SourceRenderer
 			$this->state = 'period.dash';
 	}
 
-	private function article($source)
+	private function article($source, $plain)
 	{
-		$this->bibitemStart();
+		$this->bibitemStart($plain);
 		$this->output($this->renderAuthors($source));
 		$this->outputWikiLink($source);
 		$this->setStateColonAfter();
 		$this->output($this->renderTitle($source));
 		$this->outputWikiLink($source);
 		if($this->state == 'before.all') {
-			$this->output('<em>' . $source['Zeitschrift'] . '</em>');
+			$this->output($this->emphasize($source['Zeitschrift']));
 		} else {
-			$this->output('In: <em>' . $source['Zeitschrift'] . '</em>');
+			$this->output('In: ' . $this->emphasize($source['Zeitschrift']));
 		}
 		$this->setStateAfterSentence();
 		$this->output($this->renderVolumeYearNumberPages($source));
 		if(isset($source['URL'])) {
 			$this->setStatePeriodDash();
-			$this->output($this->renderURL($source));
+			$this->output($this->renderUrl($source));
 		}
 		if(isset($source['ISSN'])) {
 			$this->setStatePeriodDash();
@@ -439,9 +453,9 @@ class SourceRenderer
 		$this->bibitemEnd();
 	}
 
-	private function book($source)
+	private function book($source, $plain)
 	{
-		$this->bibitemStart();
+		$this->bibitemStart($plain);
 		$this->output($this->renderAuthorsEditorsInvolved($source));
 		$this->outputWikiLink($source);
 		$this->setStateColonAfter();
@@ -458,7 +472,7 @@ class SourceRenderer
 		if(isset($source['Ort']) || isset($source['Verlag'])) {
 			if (isset($source['URL'])) {
 				$this->setStatePeriodDash();
-				$this->output($this->renderURL($source));
+				$this->output($this->renderUrl($source));
 			}
 		}
 		if(isset($source['ISBN'])) {
@@ -468,9 +482,9 @@ class SourceRenderer
 		$this->bibitemEnd();
 	}
 
-	private function incollection($source)
+	private function incollection($source, $plain)
 	{
-		$this->bibitemStart();
+		$this->bibitemStart($plain);
 		$this->output($this->renderAuthors($source));
 		$this->outputWikiLink($source);
 		$this->setStateColonAfter();
@@ -488,7 +502,7 @@ class SourceRenderer
 		if(isset($source['Ort']) || isset($source['Verlag'])) {
 			if (isset($source['URL'])) {
 				$this->setStatePeriodDash();
-				$this->output($this->renderURL($source));
+				$this->output($this->renderUrl($source));
 			}
 		}
 		if(isset($source['ISBN'])) {
@@ -501,15 +515,15 @@ class SourceRenderer
 		$this->bibitemEnd();
 	}
 
-	private function misc($source)
+	private function misc($source, $plain)
 	{
-		$this->bibitemStart();
+		$this->bibitemStart($plain);
 		$this->outputBlock(preg_replace('/^Kategorie:/', '', $source['title']));
 		$this->outputWikiLink($source);
 		$this->bibitemEnd();
 	}
 
-	public static function run($source)
+	public static function run($source, $plain)
 	{
 		// remove empty values
 		foreach(array_keys($source) as $key) {
@@ -526,19 +540,19 @@ class SourceRenderer
 		$renderer = new SourceRenderer();
 
 		if(isset($source['Zeitschrift'])) {
-			$renderer->article($source);
+			$renderer->article($source, $plain);
 		} else if(isset($source['Sammlung'])) {
-			$renderer->incollection($source);
+			$renderer->incollection($source, $plain);
 		} else if(isset($source['Verlag'])) {
-			$renderer->book($source);
+			$renderer->book($source, $plain);
 		} else {
-			$renderer->misc($source);
+			$renderer->misc($source, $plain);
 		}
 		return $renderer->out;
 	}
 }
 
-function renderSource($source)
+function renderSource($source, $plain)
 {
-	return SourceRenderer::run($source);
+	return SourceRenderer::run($source, $plain);
 }

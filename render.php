@@ -7,7 +7,7 @@ function insert_plag($pn, $num, $f, $source)
 
 function insert_orig($pn, $num, $f, $source)
 {
-    $tooltip =  'Quelle: '.preg_replace('/<\/?em>/', '', $source['rendered']);
+    $tooltip =  'Quelle: '.preg_replace('/<\/?em>/', '', $source['renderedplain']);
     if (isset($f['note']) && !empty($f['note']))
         $tooltip .=  '    Anmerkung: '.str_replace('"','',$f['note']);
 
@@ -47,9 +47,11 @@ function insert_script($pn, $num, $f, $source)
         $xsource = '<div class="src">'.$quelle.' auf '.$foundat.'.</div><div class="inlit">'.$lit.'</div>';
     }
 
+    $fragtype = preg_replace('/^Kategorie:/', '', $f['category']);
+
     return '		$(\'#plag'.$pn.'_'.$num.'\').hover(
         function () {
-        $(\'#infoblock-cat\').replaceWith(\'<div class="category" id="infoblock-cat"><a href="http://de.guttenplag.wikia.com/wiki/PlagiatsKategorien">'.$f['category'].'</a></div>\');
+        $(\'#infoblock-cat\').replaceWith(\'<div class="category" id="infoblock-cat"><a href="http://de.guttenplag.wikia.com/wiki/PlagiatsKategorien">'.$fragtype.'</a></div>\');
         $(\'#infoblock-src\').replaceWith(\'<div class="src" id="infoblock-src">'.$xsource.'</div>\');
             deselect(activeOrig);
             activeOrig = $(\'#orig'.$pn.'_'.$num.'\');

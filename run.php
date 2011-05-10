@@ -121,6 +121,16 @@ function getIntersection($arr1, $arr2)
 	return empty($intersect) ? false : $intersect[0];
 }
 
+// Anmerkung eines Fragments korrigieren
+function korrFragmentAnmerkung($s)
+{
+	$s = trim($s);
+	$s = preg_replace('/\{\{Fragmentsichter[^}]*\}\}/i', '', $s);
+	//$s = korrStringWithLinks($s);
+	return $s;
+}
+
+
 function prepare_png($pn, $num, $f)
 {
 	$cmd = 'convert images/'.$pn.'.png -crop 600x'.$f['length'].'+0+'.$f['startpos'].' -quality 100 -define png:bit-depth=8 '.PATH.'/plagiate/'.$pn.'_'.$num.'.png';
@@ -178,10 +188,9 @@ foreach(FragmentLoader::getFragmentsG2006() as $fragdata) {
 		$f['origlines'] = $fragdata[5];
 		$f['orig'] = $fragdata[6];
 		$f['category'] = getIntersection(array_keys($fragmenttypes), $fragdata['categories']);
-		$f['inLit'] = $fragdata[8];
 		$f['src'] = getIntersection(array_keys($sources), $fragdata['categories']);
 		$f['url'] = $fragdata[10];
-		$f['note'] = $fragdata[11];
+		$f['note'] = korrFragmentAnmerkung($fragdata[11]);
 		if($f['category'] === false) {
 			print "$title: keine Plagiatskategorie gefunden!\n";
 		} else if($f['src'] === false) {
@@ -194,7 +203,8 @@ foreach(FragmentLoader::getFragmentsG2006() as $fragdata) {
 
 // Verarbeitung der Quellen
 foreach($sources as $title => $source) {
-	$sources[$title]['rendered'] = renderSource($source);
+	$sources[$title]['rendered'] = renderSource($source, false);
+	$sources[$title]['renderedplain'] = renderSource($source, true);
 }
 
 // Berechne minimale Hoehe der Originaltext-divs
@@ -228,6 +238,7 @@ foreach($fr as $f) {
 // Gib ein HTML-Dokument pro Dissertationsseite aus, mit Fragmenten
 for($page = MIN_PAGE; $page <= MAX_PAGE; $page++) {
 	$pn = sprintf('%03d', $page);
+	$i = 0;
 	foreach($pagefrags[$page] as $f) {
 		prepare_png($pn, $i++, $f);
 	}
