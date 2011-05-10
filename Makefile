@@ -1,6 +1,7 @@
 all: report csv
 
-report: run gzips
+report: run
+# report: run gzips
 
 run::
 	@php run.php
