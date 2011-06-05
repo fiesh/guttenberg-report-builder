@@ -15,6 +15,10 @@ body {
     color: navy;
 }
 
+img {
+    border: none;
+}
+
 #pagenum {
     position: absolute;
     font-style: italic;
@@ -54,7 +58,6 @@ body {
 
 #infoblock {
     position: relative;
-    float: center;
     margin-left: 616px;
     padding: 0px;
     min-width: 600px;

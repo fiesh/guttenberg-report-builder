@@ -2,7 +2,7 @@
 
 function insert_plag($pn, $num, $f, $source)
 {
-    return '				<div id="plag'.$pn.'_'.$num.'" class="plag"><img src="plagiate/'.$pn.'_'.$num.'.png" /></div>'."\n";
+    return '            <div id="plag'.$pn.'_'.$num.'" class="plag"><img src="plagiate/'.$pn.'_'.$num.'.png" alt="" title="" /></div>'."\n";
 }
 
 function insert_orig($pn, $num, $f, $source)
@@ -16,12 +16,8 @@ function insert_orig($pn, $num, $f, $source)
         $class .= ' origfootnote';
 
     $orig = $f['orig'];
-    return
-    '				<div
-              id="orig'.$pn.'_'.$num.'"
-              class="'.$class.'"
-              title="'.$tooltip.'"
-              >'.$orig.'</div>'."\n";
+
+    return '          <div id="orig'.$pn.'_'.$num.'" class="'.$class.'" title="'.$tooltip.'">'.$orig.'</div>'."\n";
 }
 
 
@@ -30,11 +26,11 @@ function insert_script($pn, $num, $f, $source)
     $quelle = $source['rendered'];
 
     if($source['InLit'] === 'ja')
-	    $lit = '<img src="accept.png" title="Quelle in Literaturverzeichnis vorhanden." />';
-    else if($source['InFN'] === 'ja') //TODO
-	    $lit = '<img src="infn.png" title="Quelle NUR in Fußnoten vorhanden." />';
+        $lit = '<img src="accept.png" alt="Quelle in Literaturverzeichnis vorhanden." title="Quelle in Literaturverzeichnis vorhanden." />';
+    else if($source['InFN'] === 'ja')
+        $lit = '<img src="infn.png" alt="Quelle NUR in Fußnoten vorhanden." title="Quelle NUR in Fußnoten vorhanden." />';
     else
-	    $lit = '<img src="error.png" title="Quelle NICHT in Literaturverzeichnis vorhanden!" />';
+        $lit = '<img src="error.png" alt="Quelle NICHT in Literaturverzeichnis vorhanden!" title="Quelle NICHT in Literaturverzeichnis vorhanden!" />';
 
     if(isset($f['origlines']) && $f['origlines'])
         $foundat = 'Seite '.$f['origpage'].', Zeilen '.$f['origlines'];
@@ -49,22 +45,25 @@ function insert_script($pn, $num, $f, $source)
 
     $fragtype = preg_replace('/^Kategorie:/', '', $f['category']);
 
-    return '		$(\'#plag'.$pn.'_'.$num.'\').hover(
-        function () {
-        $(\'#infoblock-cat\').replaceWith(\'<div class="category" id="infoblock-cat"><a href="http://de.guttenplag.wikia.com/wiki/PlagiatsKategorien">'.$fragtype.'</a></div>\');
-        $(\'#infoblock-src\').replaceWith(\'<div class="src" id="infoblock-src">'.$xsource.'</div>\');
-            deselect(activeOrig);
-            activeOrig = $(\'#orig'.$pn.'_'.$num.'\');
-            select(activeOrig);
-        },
-        function () {
-        }
-    );';
+    return '
+            $(\'#plag'.$pn.'_'.$num.'\').hover(
+                function () {
+                $(\'#infoblock-cat\').replaceWith(\'<div class="category" id="infoblock-cat"><a href="http://de.guttenplag.wikia.com/wiki/PlagiatsKategorien">'.$fragtype.'</a></div>\');
+                $(\'#infoblock-src\').replaceWith(\'<div class="src" id="infoblock-src">'.$xsource.'</div>\');
+                    deselect(activeOrig);
+                    activeOrig = $(\'#orig'.$pn.'_'.$num.'\');
+                    select(activeOrig);
+                },
+                function () {
+                }
+            );
+';
 }
 
 function insert_css($pn, $num, $f)
 {
-    return '		#plag'.$pn.'_'.$num.' {
+    return '
+        #plag'.$pn.'_'.$num.' {
             z-index: 5;
             height: '.$f['length'].'px;
             position: absolute;
@@ -75,19 +74,23 @@ function insert_css($pn, $num, $f)
             top: '.($f['startpos']-3).'px;
             min-height: '.$f['origlength'].'px;
             position: absolute;
-        }'."\n";
+        }
+';
 }
 
 function printout($fragments, $sources, $page)
 {
-    $ret ='<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    $ret = '<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>Seite '.$page.' -- Interaktiver Guttenberg Report</title>
         <link rel="stylesheet" href="gr.css" />
-        <script src="http://code.jquery.com/jquery-1.5.min.js"></script>
+        <script src="http://code.jquery.com/jquery-1.5.min.js" type="text/javascript"></script>
         <script type="text/javascript">
+        //<![CDATA[
 
         function deselect(origDiv)
         {
@@ -107,52 +110,19 @@ function printout($fragments, $sources, $page)
             }
         }
 
-        </script>
-    </head>
-    <body>
-        <div id="home"><a href="/"><img src="up.png" border="0"/></a></div>
-        <div id="guttenberg-titel">Karl-Theodor zu Guttenberg, Verfassung und Verfassungsvertrag, 2009</div>
-        <div id="wrapper">
-            <div id="page">
-';
-    $i = 0;
-    if(isset($fragments)) foreach($fragments as $f) {
-        $ret .= insert_plag($page, $i++, $f, $sources[$f['src']]);
-    }
-    $ret .= '			</div>
-        </div>
-        <div id="infoblock">
-          <div class="category" id="infoblock-cat"></div>
-          <div class="src" id="infoblock-src"></div>';
-    $i = 0;
-    if(isset($fragments)) foreach($fragments as $f) {
-        $ret .= insert_orig($page, $i++, $f, $sources[$f['src']]);
-    }
-    $ret .='
-        </div>
-        <div class="navigation">
-';
-    $ret .= '<div id="prev"><a href="'.($page >= 2 ? sprintf('%03d', $page - 1).'.html' : '#').'"><img src="prev.png" border="0" /></a></div>';
-    $ret .= '<div id="pagenum">'.$page.'</div>';
-    $ret .= '<div id="next"><a href="'.($page <= 474 ? sprintf('%03d', $page + 1).'.html' : '#').'"><img src="next.png" border="0" /></a></div>';
-    $ret .= '
-        </div>
-    </body>
-    <script type="text/javascript">
-        var activeOrig = null;
-';
 
+        var activeOrig = null;
+        window.onload = function() {
+';
     $i = 0;
-    if(isset($fragments)) foreach($fragments as $f) {
+    foreach($fragments as $f) {
         $ret .= insert_script($page, $i++, $f, $sources[$f['src']]);
     }
-
     $ret .= '
-    </script>
-    <style type="text/css">
-';
-
-    $ret .= '
+        }
+	//]]>
+        </script>
+        <style type="text/css">
         #page {
             width: 600px;
             height: 910px;
@@ -163,11 +133,41 @@ function printout($fragments, $sources, $page)
         }
 ';
     $i = 0;
-    if(isset($fragments)) foreach($fragments as $f) {
+    foreach($fragments as $f) {
         $ret .= insert_css($page, $i++, $f, $sources[$f['src']]);
     }
-
-    $ret .= '	</style>
+    $ret .= '
+        </style>
+    </head>
+    <body>
+        <div id="home"><a href="/"><img src="up.png" alt="Inhalt" title="" /></a></div>
+        <div id="guttenberg-titel">Karl-Theodor zu Guttenberg, Verfassung und Verfassungsvertrag, 2009</div>
+        <div id="wrapper">
+          <div id="page">
+';
+    $i = 0;
+    foreach($fragments as $f) {
+        $ret .= insert_plag($page, $i++, $f, $sources[$f['src']]);
+    }
+    $ret .= '
+          </div>
+        </div>
+        <div id="infoblock">
+          <div class="category" id="infoblock-cat"></div>
+          <div class="src" id="infoblock-src"></div>
+';
+    $i = 0;
+    foreach($fragments as $f) {
+        $ret .= insert_orig($page, $i++, $f, $sources[$f['src']]);
+    }
+    $ret .= '
+        </div>
+        <div class="navigation">
+          <div id="prev"><a href="'.($page >= 2 ? sprintf('%03d', $page - 1).'.html' : '#').'"><img src="prev.png" alt="Zurück" title="" /></a></div>
+          <div id="pagenum">'.$page.'</div>
+          <div id="next"><a href="'.($page <= 474 ? sprintf('%03d', $page + 1).'.html' : '#').'"><img src="next.png" alt="Weiter" title="" /></a></div>
+        </div>
+    </body>
 </html>
 ';
     return $ret;
