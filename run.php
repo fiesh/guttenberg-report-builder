@@ -155,13 +155,14 @@ function getWikitextPayloadLines($pagetitle)
 
 function createLinePositionTable()
 {
-	foreach(getWikitextPayloadLines("Zeilenpositionen") as $line) {
+	$title = 'GuttenPlag Wiki:Metadaten/Zeilenpositionen';
+	foreach(getWikitextPayloadLines($title) as $line) {
 		if(preg_match('/^\s*(\d+):([\d.,]*):([\d.,]*)\s*$/', $line, $match)) {
 			$pagenum = (int) $match[1];
 			$linepositions[$pagenum]['zeilen'] = explode(',', $match[2]);
 			$linepositions[$pagenum]['fussnoten'] = explode(',', $match[3]);
 		} else {
-			print "Syntaxfehler in wiki/Zeilenpositionen:\n";
+			print "Syntaxfehler in $title:\n";
 			print "  '$line'\n";
 		}
 	}
